@@ -7,18 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0127E2382945217D001E0023 /* ParticipantWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E2372945217D001E0023 /* ParticipantWelcomeView.swift */; };
+		0127E23A29452554001E0023 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E23929452554001E0023 /* MainView.swift */; };
+		0127E24029452D8C001E0023 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E23F29452D8C001E0023 /* ViewController.swift */; };
+		0127E24229452E24001E0023 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E24129452E24001E0023 /* ErrorView.swift */; };
 		013803432944F87C00487F5A /* TapFixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013803422944F87C00487F5A /* TapFixApp.swift */; };
-		013803452944F87C00487F5A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013803442944F87C00487F5A /* ContentView.swift */; };
-		013803472944F87C00487F5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 013803462944F87C00487F5A /* Assets.xcassets */; };
+		013803452944F87C00487F5A /* TypingWarmupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013803442944F87C00487F5A /* TypingWarmupView.swift */; };
 		0138034A2944F87C00487F5A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 013803492944F87C00487F5A /* Preview Assets.xcassets */; };
+		013803512945028600487F5A /* SentenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013803502945028600487F5A /* SentenceManager.swift */; };
+		013803542945100D00487F5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 013803462944F87C00487F5A /* Assets.xcassets */; };
+		013803562945116900487F5A /* phrases2.txt in Resources */ = {isa = PBXBuildFile; fileRef = 013803552945116900487F5A /* phrases2.txt */; };
+		0138035B2945169400487F5A /* TestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0138035A2945169400487F5A /* TestManager.swift */; };
+		0138035E2945179700487F5A /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0138035D2945179700487F5A /* TestData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0127E2372945217D001E0023 /* ParticipantWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantWelcomeView.swift; sourceTree = "<group>"; };
+		0127E23929452554001E0023 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		0127E23F29452D8C001E0023 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0127E24129452E24001E0023 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		0138033F2944F87C00487F5A /* TapFix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TapFix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		013803422944F87C00487F5A /* TapFixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapFixApp.swift; sourceTree = "<group>"; };
-		013803442944F87C00487F5A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		013803442944F87C00487F5A /* TypingWarmupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingWarmupView.swift; sourceTree = "<group>"; };
 		013803462944F87C00487F5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		013803492944F87C00487F5A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		013803502945028600487F5A /* SentenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceManager.swift; sourceTree = "<group>"; };
+		013803552945116900487F5A /* phrases2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phrases2.txt; sourceTree = "<group>"; };
+		0138035A2945169400487F5A /* TestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestManager.swift; sourceTree = "<group>"; };
+		0138035D2945179700487F5A /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
+		0138035F29451EDE00487F5A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,8 +68,12 @@
 		013803412944F87C00487F5A /* TapFix */ = {
 			isa = PBXGroup;
 			children = (
+				0138035F29451EDE00487F5A /* Info.plist */,
+				0138035C2945176C00487F5A /* models */,
+				013803592945168100487F5A /* classes */,
+				013803582945164400487F5A /* views */,
+				013803572945119F00487F5A /* data */,
 				013803422944F87C00487F5A /* TapFixApp.swift */,
-				013803442944F87C00487F5A /* ContentView.swift */,
 				013803462944F87C00487F5A /* Assets.xcassets */,
 				013803482944F87C00487F5A /* Preview Content */,
 			);
@@ -65,6 +86,43 @@
 				013803492944F87C00487F5A /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		013803572945119F00487F5A /* data */ = {
+			isa = PBXGroup;
+			children = (
+				013803552945116900487F5A /* phrases2.txt */,
+			);
+			path = data;
+			sourceTree = "<group>";
+		};
+		013803582945164400487F5A /* views */ = {
+			isa = PBXGroup;
+			children = (
+				013803442944F87C00487F5A /* TypingWarmupView.swift */,
+				0127E2372945217D001E0023 /* ParticipantWelcomeView.swift */,
+				0127E23929452554001E0023 /* MainView.swift */,
+				0127E24129452E24001E0023 /* ErrorView.swift */,
+			);
+			path = views;
+			sourceTree = "<group>";
+		};
+		013803592945168100487F5A /* classes */ = {
+			isa = PBXGroup;
+			children = (
+				013803502945028600487F5A /* SentenceManager.swift */,
+				0138035A2945169400487F5A /* TestManager.swift */,
+				0127E23F29452D8C001E0023 /* ViewController.swift */,
+			);
+			path = classes;
+			sourceTree = "<group>";
+		};
+		0138035C2945176C00487F5A /* models */ = {
+			isa = PBXGroup;
+			children = (
+				0138035D2945179700487F5A /* TestData.swift */,
+			);
+			path = models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,8 +183,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				013803542945100D00487F5A /* Assets.xcassets in Resources */,
+				013803562945116900487F5A /* phrases2.txt in Resources */,
 				0138034A2944F87C00487F5A /* Preview Assets.xcassets in Resources */,
-				013803472944F87C00487F5A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,8 +196,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				013803452944F87C00487F5A /* ContentView.swift in Sources */,
+				013803512945028600487F5A /* SentenceManager.swift in Sources */,
+				0127E23A29452554001E0023 /* MainView.swift in Sources */,
+				0127E2382945217D001E0023 /* ParticipantWelcomeView.swift in Sources */,
+				013803452944F87C00487F5A /* TypingWarmupView.swift in Sources */,
 				013803432944F87C00487F5A /* TapFixApp.swift in Sources */,
+				0138035E2945179700487F5A /* TestData.swift in Sources */,
+				0127E24029452D8C001E0023 /* ViewController.swift in Sources */,
+				0127E24229452E24001E0023 /* ErrorView.swift in Sources */,
+				0138035B2945169400487F5A /* TestManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +336,8 @@
 				DEVELOPMENT_TEAM = CZG3SGLH4K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TapFix/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +367,8 @@
 				DEVELOPMENT_TEAM = CZG3SGLH4K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TapFix/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
