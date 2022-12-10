@@ -15,6 +15,7 @@ struct TypingWarmupView: View {
     @State private var text: String = ""
     @State private var previousText: String = ""
     @FocusState private var textFieldFocused: Bool
+    @EnvironmentObject var viewController: ViewController;
     
     func onTextFieldChange_preventDeletion(_: String) {
         if text.count < previousText.count {
@@ -39,7 +40,9 @@ struct TypingWarmupView: View {
         textFieldFocused = true;
     }
     
-    func proceed() {}
+    func proceed() {
+        viewController.next();
+    }
     
     var body: some View {
         VStack {
@@ -52,6 +55,7 @@ struct TypingWarmupView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                 TextField("Type here..", text: $text)
+                    .keyboardType(.alphabet)
                     .disableAutocorrection(true)
                     .textInputAutocapitalization(.never)
                     .textFieldStyle(.roundedBorder)

@@ -8,17 +8,16 @@
 import Foundation
 
 class ViewController: ObservableObject {
-    static let shared = ViewController()
+    @Published var currentState: Int = 0;
     
-    @Published var CurrentState: Int = 0;
-    private init(){}
+    init(){}
     
     public func next()
     {
-        CurrentState += 1;
+        currentState += 1;
     }
     public func prev()
     {
-        CurrentState -= 1;
+        currentState -= 1;
     }
 }

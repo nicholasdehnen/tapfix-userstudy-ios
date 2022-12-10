@@ -10,23 +10,20 @@ import SwiftUI
 struct MainView: View {
     
     @State var currentState: Int = 0;
+    @StateObject var viewController = ViewController();
     
     var body: some View {
-        
-        ViewController.shared.$CurrentState.sink { newState in
-            currentState = newState;
-        }
-        
-        switch(ViewController.shared.CurrentState)
+        switch(viewController.currentState)
         {
         case 0:
-            ParticipantWelcomeView()
+            ParticipantWelcomeView().environmentObject(viewController)
                 .transition(.slide)
         case 1:
             TypingWarmupView()
+                .environmentObject(viewController)
                 .transition(.slide)
         default:
-            ParticipantWelcomeView()
+            ErrorView(errorMessage: "No more views to show.")
         }
     }
 }

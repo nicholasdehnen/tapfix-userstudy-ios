@@ -12,10 +12,11 @@ import Combine
 struct ParticipantWelcomeView: View {
     
     @State private var participantId: String = "";
+    @EnvironmentObject var viewController: ViewController;
     private let ID_LENGTH_LIMIT: Int = 5;
     
     func proceed() {
-        ViewController.shared.next()
+        viewController.next();
     }
     
     var body: some View {
