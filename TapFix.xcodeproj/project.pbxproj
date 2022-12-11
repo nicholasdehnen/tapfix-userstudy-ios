@@ -24,6 +24,8 @@
 		017C1EDA2945994A00D6A417 /* TypoSentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1ED92945994A00D6A417 /* TypoSentence.swift */; };
 		017C1EDC2945A4EC00D6A417 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1EDB2945A4EC00D6A417 /* StringExtension.swift */; };
 		01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */; };
+		01E3AA8029467DBC00EEDBBB /* UIKitTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 01E3AA7F29467DBC00EEDBBB /* UIKitTextField */; };
+		01E3AA8229467EB500EEDBBB /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E3AA8129467EB500EEDBBB /* PaddedTextField.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +48,7 @@
 		017C1ED92945994A00D6A417 /* TypoSentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoSentence.swift; sourceTree = "<group>"; };
 		017C1EDB2945A4EC00D6A417 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionView.swift; sourceTree = "<group>"; };
+		01E3AA8129467EB500EEDBBB /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01E3AA8029467DBC00EEDBBB /* UIKitTextField in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,6 +131,7 @@
 				0127E23F29452D8C001E0023 /* ViewController.swift */,
 				017C1ED72945988F00D6A417 /* TypoGenerator.swift */,
 				017C1EDB2945A4EC00D6A417 /* StringExtension.swift */,
+				01E3AA8129467EB500EEDBBB /* PaddedTextField.swift */,
 			);
 			path = classes;
 			sourceTree = "<group>";
@@ -156,6 +161,9 @@
 			dependencies = (
 			);
 			name = TapFix;
+			packageProductDependencies = (
+				01E3AA7F29467DBC00EEDBBB /* UIKitTextField */,
+			);
 			productName = TapFix;
 			productReference = 0138033F2944F87C00487F5A /* TapFix.app */;
 			productType = "com.apple.product-type.application";
@@ -184,6 +192,9 @@
 				Base,
 			);
 			mainGroup = 013803362944F87C00487F5A;
+			packageReferences = (
+				01E3AA7E29467DBC00EEDBBB /* XCRemoteSwiftPackageReference "uikit-textfield" */,
+			);
 			productRefGroup = 013803402944F87C00487F5A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -212,6 +223,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				013803512945028600487F5A /* SentenceManager.swift in Sources */,
+				01E3AA8229467EB500EEDBBB /* PaddedTextField.swift in Sources */,
 				0127E244294539CC001E0023 /* TypoCorrectionWarmup.swift in Sources */,
 				01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */,
 				0127E23A29452554001E0023 /* MainView.swift in Sources */,
@@ -429,6 +441,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		01E3AA7E29467DBC00EEDBBB /* XCRemoteSwiftPackageReference "uikit-textfield" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/vinceplusplus/uikit-textfield.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		01E3AA7F29467DBC00EEDBBB /* UIKitTextField */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 01E3AA7E29467DBC00EEDBBB /* XCRemoteSwiftPackageReference "uikit-textfield" */;
+			productName = UIKitTextField;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 013803372944F87C00487F5A /* Project object */;
 }

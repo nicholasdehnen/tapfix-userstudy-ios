@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKitTextField
 
 struct TypoCorrectionView: View {
     
@@ -46,15 +47,41 @@ struct TypoCorrectionView: View {
                     .foregroundColor(Color.green)
                 Text(typoSentence.Suffix)
             }
-            TextField("Please wait..", text: $userText)
-                .keyboardType(.alphabet)
-                .disableAutocorrection(true)
-                .textInputAutocapitalization(.never)
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.center)
-                .padding()
-                .onSubmit(self.completionHandler)
-                .disabled(preview)
+
+            UIKitTextField(
+                config: .init {PaddedTextField()}
+                    .configure { uiTextField in
+                        uiTextField.padding = .init(top: 8, left: 8, bottom: 8, right: 8)
+                    }
+                    .value(text: $userText)
+                    .keyboardType(.alphabet)
+                    .returnKeyType(.next)
+                    .autocapitalizationType(UITextAutocapitalizationType.none)
+                    .autocorrectionType(.no)
+                    .textAlignment(.center)
+                    .shouldReturn(handler: { uiTextField in
+                        if(uiTextField.returnKeyType == UIReturnKeyType.next) {
+                            self.completionHandler()
+                            return true
+                        }
+                        return false
+                    })
+                    .onChangedSelection(handler: { uiTextField in
+                        print(uiTextField.selectedTextRange as Any) // do measurements here!!
+                    })
+                    .shouldChangeCharacters(handler: { uiTextField, range, replacementString in
+                        print(uiTextField.text as Any) // and here!!
+                        print(range)
+                        print(replacementString)
+                        return true
+                    })
+            )
+            .disabled(preview)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color(.systemGray5), lineWidth: 1)
+            )
+            .padding()
             Spacer()
         }
         .padding()
