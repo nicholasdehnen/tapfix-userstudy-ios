@@ -9,6 +9,7 @@ import Foundation
 
 class ViewController: ObservableObject {
     @Published var currentState: Int = 0;
+    @Published var lastError: String = "";
     
     init(){}
     
@@ -16,8 +17,16 @@ class ViewController: ObservableObject {
     {
         currentState += 1;
     }
+    
     public func prev()
     {
         currentState -= 1;
     }
+    
+    public func error(errorMessage: String)
+    {
+        lastError = errorMessage;
+        currentState = -1;
+    }
+
 }

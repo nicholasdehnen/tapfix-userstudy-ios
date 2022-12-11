@@ -9,11 +9,46 @@ import SwiftUI
 
 struct TypoCorrectionWarmup: View {
 
+    @EnvironmentObject var viewController: ViewController;
+    
     @State var text: String = "i love my fiye cats";
     @State var sentenceStart: String = "i love my";
     @State var sentencePieceFaulty: String = "fiye";
     @State var sentencePieceCorrect: String = "five";
     @State var sentenceEnd: String = "cats";
+    
+    @State private var sentence: TypoSentence;
+    private let typoGenerator: TypoGenerator;
+    
+    init()
+    {
+        typoGenerator = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true, randomSeed: UInt64(TestManager.shared.testData.ParticipantId)))
+        
+        sentence = TypoSentence(Prefix: "please wait ", Typo: "loading", Correction: "loading", Suffix: "sentences..")
+    }
+    
+    func nextSentence()
+    {
+        do {
+            sentence = try typoGenerator.generateSentence()
+        }
+        catch let error {
+            viewController.error(errorMessage: error.localizedDescription)
+            return
+        }
+        
+        self.sentenceStart = sentence.Prefix
+        self.sentencePieceFaulty = sentence.Typo
+        self.sentencePieceCorrect = sentence.Correction
+        self.sentenceEnd = sentence.Suffix
+        self.text = [sentenceStart, sentencePieceFaulty, sentenceEnd].joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    func submit()
+    {
+        // get new sentence
+        nextSentence()
+    }
     
     var body: some View {
         VStack {
@@ -44,10 +79,12 @@ struct TypoCorrectionWarmup: View {
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.center)
                 .padding()
+                .onSubmit(submit)
             Spacer()
         }
         .padding()
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onAppear(perform: nextSentence)
     }
 }
 
