@@ -8,83 +8,82 @@
 import SwiftUI
 
 struct TypoCorrectionWarmup: View {
-
+    
     @EnvironmentObject var viewController: ViewController;
+    @State private var navigationPath = NavigationPath();
     
-    @State var text: String = "i love my fiye cats";
-    @State var sentenceStart: String = "i love my";
-    @State var sentencePieceFaulty: String = "fiye";
-    @State var sentencePieceCorrect: String = "five";
-    @State var sentenceEnd: String = "cats";
-    
-    @State private var sentence: TypoSentence;
+    @State private var currentSentence: Int = 0;
+    private let warmupCount: Int = 3;
+    private var sentences: [TypoSentence];
     private let typoGenerator: TypoGenerator;
+    private let correctionMethod: Int;
+    private let correctionMethodExplanations: [String];
     
-    init()
+    init(correctionMethod: Int = 0)
     {
         typoGenerator = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true, randomSeed: UInt64(TestManager.shared.testData.ParticipantId)))
-        
-        sentence = TypoSentence(Prefix: "please wait ", Typo: "loading", Correction: "loading", Suffix: "sentences..")
+        sentences = typoGenerator.generateSentences(num: warmupCount)
+        self.correctionMethod = correctionMethod
+        correctionMethodExplanations = ["Long press the space bar and move your finger horizontally to position the cursor behind the faulty letter.", "Long press on the text field and use the magnifying glass to position the cursor behind the faulty letter.", "Double tap the faulty word and swipe up to delete a letter, or down to replace it."]
     }
     
-    func nextSentence()
+    func handleTypoCorrectionComplete()
     {
-        do {
-            sentence = try typoGenerator.generateSentence()
-        }
-        catch let error {
-            viewController.error(errorMessage: error.localizedDescription)
-            return
-        }
-        
-        self.sentenceStart = sentence.Prefix
-        self.sentencePieceFaulty = sentence.Typo
-        self.sentencePieceCorrect = sentence.Correction
-        self.sentenceEnd = sentence.Suffix
-        self.text = [sentenceStart, sentencePieceFaulty, sentenceEnd].joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-    
-    func submit()
-    {
-        // get new sentence
-        nextSentence()
+        currentSentence += 1;
+        navigationPath.append(currentSentence)
     }
     
     var body: some View {
-        VStack {
-            Spacer()
-            Text("Correct the following sentence:")
-                .font(.headline)
-                .padding(.bottom, 3.0)
-            HStack(alignment: .top) {
-                Text(sentenceStart)
-                VStack {
-                    Text(sentencePieceFaulty)
-                        .foregroundColor(Color.red)
-                        .underline()
-                    Image(systemName: "arrow.down")
+        NavigationStack(path: $navigationPath) {
+            VStack {
+                Text("Typo Correction Warmup")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding()
+                List {
+                    Text("In the following screens, you'll be shown correction tasks of the following layout:")
+                    VStack(alignment: .center) {
+                        TypoCorrectionView(typoSentence: TypoSentence(Prefix: "the cat", Typo: "frll", Correction: "fell", Suffix: "in the water", Full: "the cat frll in the water"), completionHandler: {}, preview: true)
+                    }
+                    Text("Your task is to correct the mistake in the given sentence using ")+Text("only").underline()+Text(" this method:")
+                    Text(correctionMethodExplanations[correctionMethod])
+                        .italic()
+                    Text("Do this as fast and accurately as possible.")
+                    Text("Time measurement will start the moment you touch the text field. Press the button below to continue.")
                 }
-                Text(sentenceEnd)
-            }
-            HStack(alignment: .top) {
-                Text(sentenceStart)
-                Text(sentencePieceCorrect)
-                    .foregroundColor(Color.green)
-                Text(sentenceEnd)
-            }
-            TextField("Please wait..", text: $text)
-                .keyboardType(.alphabet)
-                .disableAutocorrection(true)
-                .textInputAutocapitalization(.never)
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.center)
                 .padding()
-                .onSubmit(submit)
-            Spacer()
+                .listStyle(.plain)
+                Button("Start warm-up") {
+                    navigationPath.append(currentSentence)
+                }
+                .buttonStyle(.bordered)
+            }
+            .navigationDestination(for: Int.self) { i in
+                VStack {
+                    if(i < warmupCount)
+                    {
+                        ProgressView(value: Double(i) / Double(warmupCount)) {
+                                Text("Sentence \(i+1) out of \(warmupCount)")
+                        }
+                        .padding(.horizontal)
+                        .padding(.top)
+                        TypoCorrectionView(typoSentence: sentences[i], completionHandler: handleTypoCorrectionComplete)
+                            .navigationBarBackButtonHidden(true)
+                    }
+                    else
+                    {
+                        VStack {
+                            Spacer()
+                            Text("Done!")
+                                .font(.title)
+                            Text("The typo-correction warm-up is now complete.")
+                            Spacer()
+                        }
+                        .navigationBarBackButtonHidden(true)
+                    }
+                }
+            }
         }
-        .padding()
-        .ignoresSafeArea(.keyboard, edges: .bottom)
-        .onAppear(perform: nextSentence)
     }
 }
 

@@ -11,7 +11,7 @@ import SwiftUI
 struct TapFixApp: App {
     var body: some Scene {
         WindowGroup {
-            TypoCorrectionWarmup()
+            MainView()
         }
     }
 }

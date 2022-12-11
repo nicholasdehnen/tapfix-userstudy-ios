@@ -19,12 +19,16 @@ struct ErrorView: View {
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(Color.white, Color.yellow)
             Text("An error occurred: ")
-                .padding()
+                .padding(.top)
             TextEditor(text: $errorMessage)
                 .multilineTextAlignment(.center)
                 .padding(.bottom)
                 .foregroundStyle(Color.gray)
                 .frame(height: 150.0)
+            Button("Quit application", action: {
+                exit(-1)
+            })
+                .buttonStyle(.bordered)
         }
         .padding()
     }

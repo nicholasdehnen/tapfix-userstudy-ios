@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MainView: View {
     
-    @State var currentState: Int = 0;
     @StateObject var viewController = ViewController();
     
     var body: some View {
@@ -22,6 +21,12 @@ struct MainView: View {
             TypingWarmupView()
                 .environmentObject(viewController)
                 .transition(.slide)
+        case 2:
+            TypoCorrectionWarmup()
+                .environmentObject(viewController)
+                .transition(.slide)
+        case -1:
+            ErrorView(errorMessage: viewController.lastError)
         default:
             ErrorView(errorMessage: "No more views to show.")
         }

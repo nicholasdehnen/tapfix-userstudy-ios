@@ -23,6 +23,7 @@
 		017C1ED82945988F00D6A417 /* TypoGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1ED72945988F00D6A417 /* TypoGenerator.swift */; };
 		017C1EDA2945994A00D6A417 /* TypoSentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1ED92945994A00D6A417 /* TypoSentence.swift */; };
 		017C1EDC2945A4EC00D6A417 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1EDB2945A4EC00D6A417 /* StringExtension.swift */; };
+		01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		017C1ED72945988F00D6A417 /* TypoGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoGenerator.swift; sourceTree = "<group>"; };
 		017C1ED92945994A00D6A417 /* TypoSentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoSentence.swift; sourceTree = "<group>"; };
 		017C1EDB2945A4EC00D6A417 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
+		01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				0127E23929452554001E0023 /* MainView.swift */,
 				0127E24129452E24001E0023 /* ErrorView.swift */,
 				0127E243294539CC001E0023 /* TypoCorrectionWarmup.swift */,
+				01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 			files = (
 				013803512945028600487F5A /* SentenceManager.swift in Sources */,
 				0127E244294539CC001E0023 /* TypoCorrectionWarmup.swift in Sources */,
+				01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */,
 				0127E23A29452554001E0023 /* MainView.swift in Sources */,
 				0127E2382945217D001E0023 /* ParticipantWelcomeView.swift in Sources */,
 				013803452944F87C00487F5A /* TypingWarmupView.swift in Sources */,

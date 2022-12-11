@@ -12,4 +12,5 @@ struct TypoSentence {
     public let Typo: String;
     public let Correction: String;
     public let Suffix: String;
+    public let Full: String;
 }
