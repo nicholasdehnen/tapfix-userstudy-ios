@@ -22,7 +22,7 @@ struct MainView: View {
                 .environmentObject(viewController)
                 .transition(.slide)
         case 2:
-            TypoCorrectionWarmup()
+            TypoCorrectionTestView(correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Delete)
                 .environmentObject(viewController)
                 .transition(.slide)
         case -1:

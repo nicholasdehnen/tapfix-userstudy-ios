@@ -11,7 +11,7 @@
 		0127E23A29452554001E0023 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E23929452554001E0023 /* MainView.swift */; };
 		0127E24029452D8C001E0023 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E23F29452D8C001E0023 /* ViewController.swift */; };
 		0127E24229452E24001E0023 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E24129452E24001E0023 /* ErrorView.swift */; };
-		0127E244294539CC001E0023 /* TypoCorrectionWarmup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E243294539CC001E0023 /* TypoCorrectionWarmup.swift */; };
+		0127E244294539CC001E0023 /* TypoCorrectionTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0127E243294539CC001E0023 /* TypoCorrectionTestView.swift */; };
 		013803432944F87C00487F5A /* TapFixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013803422944F87C00487F5A /* TapFixApp.swift */; };
 		013803452944F87C00487F5A /* TypingWarmupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013803442944F87C00487F5A /* TypingWarmupView.swift */; };
 		0138034A2944F87C00487F5A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 013803492944F87C00487F5A /* Preview Assets.xcassets */; };
@@ -34,7 +34,7 @@
 		0127E23929452554001E0023 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		0127E23F29452D8C001E0023 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		0127E24129452E24001E0023 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
-		0127E243294539CC001E0023 /* TypoCorrectionWarmup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionWarmup.swift; sourceTree = "<group>"; };
+		0127E243294539CC001E0023 /* TypoCorrectionTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionTestView.swift; sourceTree = "<group>"; };
 		0138033F2944F87C00487F5A /* TapFix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TapFix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		013803422944F87C00487F5A /* TapFixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapFixApp.swift; sourceTree = "<group>"; };
 		013803442944F87C00487F5A /* TypingWarmupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingWarmupView.swift; sourceTree = "<group>"; };
@@ -84,8 +84,8 @@
 		013803412944F87C00487F5A /* TapFix */ = {
 			isa = PBXGroup;
 			children = (
-				01E4AEFD2947A1340068FC33 /* viewmodels */,
 				0138035F29451EDE00487F5A /* Info.plist */,
+				01E4AEFD2947A1340068FC33 /* viewmodels */,
 				0138035C2945176C00487F5A /* models */,
 				013803592945168100487F5A /* classes */,
 				013803582945164400487F5A /* views */,
@@ -120,7 +120,7 @@
 				0127E2372945217D001E0023 /* ParticipantWelcomeView.swift */,
 				0127E23929452554001E0023 /* MainView.swift */,
 				0127E24129452E24001E0023 /* ErrorView.swift */,
-				0127E243294539CC001E0023 /* TypoCorrectionWarmup.swift */,
+				0127E243294539CC001E0023 /* TypoCorrectionTestView.swift */,
 				01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */,
 			);
 			path = views;
@@ -235,7 +235,7 @@
 			files = (
 				013803512945028600487F5A /* SentenceManager.swift in Sources */,
 				01E3AA8229467EB500EEDBBB /* PaddedTextField.swift in Sources */,
-				0127E244294539CC001E0023 /* TypoCorrectionWarmup.swift in Sources */,
+				0127E244294539CC001E0023 /* TypoCorrectionTestView.swift in Sources */,
 				01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */,
 				0127E23A29452554001E0023 /* MainView.swift in Sources */,
 				0127E2382945217D001E0023 /* ParticipantWelcomeView.swift in Sources */,

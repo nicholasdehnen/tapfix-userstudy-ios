@@ -7,15 +7,15 @@
 
 import Foundation
 
-enum TypoCorrectionMethod : Codable {
-    case SpacebarSwipe
-    case TextFieldLongPress
-    case TapFix
+enum TypoCorrectionMethod : String, Codable {
+    case SpacebarSwipe = "SpacebarSwipe"
+    case TextFieldLongPress = "TextFieldLongPress"
+    case TapFix = "TapFix"
 }
 
-enum TypoCorrectionType : Codable {
-    case Replace
-    case Delete
+enum TypoCorrectionType : String, Codable {
+    case Replace = "Replace"
+    case Delete = "Delete"
 }
 
 struct TypingWarmupResult : Codable {

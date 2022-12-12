@@ -15,7 +15,10 @@ struct TypoCorrectionView: View {
     var body: some View {
         
         VStack {
-            Spacer()
+            if(!vm.preview)
+            {
+                Spacer()
+            }
             Text("Correct the following sentence:")
                 .font(.headline)
                 .padding(.bottom, 3.0)
@@ -58,8 +61,12 @@ struct TypoCorrectionView: View {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color(.systemGray5), lineWidth: 1)
             )
-            .padding()
-            Spacer()
+            .padding(.all, vm.preview ? 0 : nil)
+            
+            if(!vm.preview)
+            {
+                Spacer()
+            }
         }
         .padding()
         .ignoresSafeArea(.keyboard, edges: .bottom)

@@ -26,9 +26,11 @@ class TypoCorrectionViewModel : ObservableObject
     let taskId: Int;
     let correctionMethod: TypoCorrectionMethod;
     let correctionType: TypoCorrectionType;
+    let refDate: Date;
     
     private var lastLegalTextRange: UITextRange?;
     private var typoPosition: Int = -1;
+    private var typoDeletedSentence: String;
     
     internal init(id: Int, typoSentence: TypoSentence, correctionMethod: TypoCorrectionMethod, correctionType: TypoCorrectionType, completionHandler: @escaping (TypoCorrectionResult) -> Void, preview: Bool = false) {
         self.taskId = id
@@ -39,7 +41,7 @@ class TypoCorrectionViewModel : ObservableObject
         self.typoSentence = typoSentence
         self.userText = typoSentence.Full
         
-        let refDate = Date(timeIntervalSinceReferenceDate: 0)
+        self.refDate = Date(timeIntervalSinceReferenceDate: 0)
         self.beganEditing = refDate
         self.beganSelecting = refDate
         self.finishedSelecting = refDate
@@ -49,7 +51,9 @@ class TypoCorrectionViewModel : ObservableObject
         self.completionHandler = completionHandler
         self.preview = preview
         
+        self.typoDeletedSentence = typoSentence.Full
         self.typoPosition = calculateTypoIndex()
+        self.typoDeletedSentence.remove(at: typoDeletedSentence.index(typoDeletedSentence.startIndex, offsetBy: typoPosition))
     }
     
     private func calculateTypoIndex() -> Int
@@ -107,25 +111,30 @@ class TypoCorrectionViewModel : ObservableObject
             {
                 finishedRemovingFaulty = Date.now
             }
+            if(correctionType == .Delete && finishedEditing.timeIntervalSinceReferenceDate == 0)
+            {
+                finishedEditing = Date.now
+            }
+            return true;
         }
-        else if(range.length == 1 && replacementString.isEmpty && range.location != typoPosition)
+        else if(range.location != typoPosition)
         {
             // don't allow user to replace any other character
             return false;
         }
-        else if(!replacementString.isEmpty)
+        else
         {
-            // user fixed error, set finishedEditing
             var newText = userText;
             newText.insert(replacementString.first!, at: userText.index(userText.startIndex, offsetBy: range.location));
+            
+            // compare corrected sentence against expected result
             if(newText.compare(typoSentence.FullCorrect, options: .caseInsensitive) == .orderedSame)
             {
                 textField.text = newText;
                 self.finishedEditing = Date.now;
-                return false;
             }
         }
-        return true;
+        return false;
     }
     
     func onBeganEditing(textField: PaddedTextField)
@@ -141,6 +150,19 @@ class TypoCorrectionViewModel : ObservableObject
     {
         if(self.beganEditing.timeIntervalSinceReferenceDate != 0 && self.beganSelecting.timeIntervalSinceReferenceDate == 0) {
             self.beganSelecting = Date.now
+        }
+        
+        if(userText.compare(typoSentence.Full) != .orderedSame
+           && userText.compare(typoDeletedSentence) != .orderedSame)
+        {
+            // user made an error, reset the whole test
+            textField.text = typoSentence.Full
+            textFieldIsFocused = false
+            self.beganEditing = refDate
+            self.beganSelecting = refDate
+            self.finishedRemovingFaulty = refDate
+            self.finishedSelecting = refDate
+            self.finishedEditing = refDate
         }
         
         if let selectedRange = textField.selectedTextRange {
