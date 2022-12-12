@@ -34,7 +34,7 @@ class TapFixViewModel : ObservableObject
     @Published var textInput: String
     @Published var textInputFocused: Bool
     
-    private var replaceId: Int
+    @Published var activeReplaceId: Int
     
     internal init() {
         self.selectedWordCharacters = [TapFixCharacter("t", 0), TapFixCharacter("a", 1), TapFixCharacter("p", 2),
@@ -42,7 +42,7 @@ class TapFixViewModel : ObservableObject
         self.tapFixActive = true
         self.textInput = ""
         self.textInputFocused = false
-        self.replaceId = -1
+        self.activeReplaceId = -1
     }
     
     func buttonDrag(direction: SwipeHVDirection, id: Int)
@@ -54,23 +54,23 @@ class TapFixViewModel : ObservableObject
         if(direction == .down)
         {
             self.textInputFocused = true
-            self.replaceId = id
+            self.activeReplaceId = id
         }
     }
     
     func keyboardInput(textField: BaseUITextField, range: NSRange, replacement: String) -> Bool
     {
         self.textInputFocused = false
-        if(replaceId != -1)
+        if(activeReplaceId != -1)
         {
             for i in 0..<selectedWordCharacters.count
             {
-                if(selectedWordCharacters[i].Id == replaceId && replacement.first != nil)
+                if(selectedWordCharacters[i].Id == activeReplaceId && replacement.first != nil)
                 {
                     selectedWordCharacters[i].Character = replacement.first!.lowercased()
                 }
             }
-            replaceId = -1
+            activeReplaceId = -1
         }
         return false
     }

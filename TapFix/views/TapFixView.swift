@@ -11,6 +11,7 @@ import UIKitTextField
 struct TapFixView: View {
     
     @ObservedObject var vm: TapFixViewModel
+    @State var charProps: [Int: (drag: CGSize, opacity: Double)] = [:]
     
     var body: some View {
         if(vm.tapFixActive)
@@ -25,14 +26,24 @@ struct TapFixView: View {
                             .foregroundColor(.black)
                             .fontWeight(.bold)
                             .font(.title)
-                            .tint(.blue)
-                            .gesture(
+                            .tint(vm.activeReplaceId == c.Id ? .red : .blue)
+                            .offset(self.charProps[c.Id]?.drag ?? .zero)
+                            .highPriorityGesture(
                                 DragGesture()
+                                    .onChanged({ value in
+                                        self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
+                                        self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
+                                    })
                                     .onEnded({value in
-                                        //print(value)
                                         vm.buttonDrag(direction: detectDirection(value: value), id: c.Id)
+                                        self.charProps[c.Id]?.drag = .zero
                                     })
                             )
+                            .opacity(self.charProps[c.Id]?.opacity ?? 100.0)
+                            
+                            .onAppear(perform: {
+                                self.charProps[c.Id] = (.zero, 100.0)
+                            })
                         Spacer()
                     }
                 }
@@ -59,18 +70,19 @@ struct TapFixView: View {
      SwipeHVDirection / detectDirection from: https://stackoverflow.com/a/61806129
      */
     func detectDirection(value: DragGesture.Value) -> SwipeHVDirection {
-        if value.startLocation.x < value.location.x - 24 {
-            return .left
-        }
-        if value.startLocation.x > value.location.x + 24 {
-            return .right
-        }
         if value.startLocation.y < value.location.y - 24 {
             return .down
         }
         if value.startLocation.y > value.location.y + 24 {
             return .up
         }
+        if value.startLocation.x < value.location.x - 24 {
+            return .left
+        }
+        if value.startLocation.x > value.location.x + 24 {
+            return .right
+        }
+        
         return .none
     }
 }
