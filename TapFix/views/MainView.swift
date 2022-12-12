@@ -25,6 +25,8 @@ struct MainView: View {
             TypoCorrectionTestView(correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Delete)
                 .environmentObject(viewController)
                 .transition(.slide)
+        case 99:
+            TapFixView(vm: TapFixViewModel())
         case -1:
             ErrorView(errorMessage: viewController.lastError)
         default:
