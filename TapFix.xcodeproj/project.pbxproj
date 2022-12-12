@@ -26,6 +26,7 @@
 		01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */; };
 		01E3AA8029467DBC00EEDBBB /* UIKitTextField in Frameworks */ = {isa = PBXBuildFile; productRef = 01E3AA7F29467DBC00EEDBBB /* UIKitTextField */; };
 		01E3AA8229467EB500EEDBBB /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E3AA8129467EB500EEDBBB /* PaddedTextField.swift */; };
+		01E4AEFB294782700068FC33 /* TypoCorrectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E4AEFA294782700068FC33 /* TypoCorrectionViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,7 @@
 		017C1EDB2945A4EC00D6A417 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionView.swift; sourceTree = "<group>"; };
 		01E3AA8129467EB500EEDBBB /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
+		01E4AEFA294782700068FC33 /* TypoCorrectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 		013803412944F87C00487F5A /* TapFix */ = {
 			isa = PBXGroup;
 			children = (
+				01E4AEFD2947A1340068FC33 /* viewmodels */,
 				0138035F29451EDE00487F5A /* Info.plist */,
 				0138035C2945176C00487F5A /* models */,
 				013803592945168100487F5A /* classes */,
@@ -143,6 +146,14 @@
 				017C1ED92945994A00D6A417 /* TypoSentence.swift */,
 			);
 			path = models;
+			sourceTree = "<group>";
+		};
+		01E4AEFD2947A1340068FC33 /* viewmodels */ = {
+			isa = PBXGroup;
+			children = (
+				01E4AEFA294782700068FC33 /* TypoCorrectionViewModel.swift */,
+			);
+			path = viewmodels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -230,6 +241,7 @@
 				0127E2382945217D001E0023 /* ParticipantWelcomeView.swift in Sources */,
 				013803452944F87C00487F5A /* TypingWarmupView.swift in Sources */,
 				013803432944F87C00487F5A /* TapFixApp.swift in Sources */,
+				01E4AEFB294782700068FC33 /* TypoCorrectionViewModel.swift in Sources */,
 				017C1EDA2945994A00D6A417 /* TypoSentence.swift in Sources */,
 				0138035E2945179700487F5A /* TestData.swift in Sources */,
 				0127E24029452D8C001E0023 /* ViewController.swift in Sources */,

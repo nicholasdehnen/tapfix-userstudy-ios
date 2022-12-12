@@ -40,14 +40,16 @@ class TypoGenerator
         //    throw TypoGeneratorError.sentencesEmpty;
         //}
         
-        let sentence = sentences[index % (sentences.count-1)];
+        let sentence = sentences[index % (sentences.count-1)].lowercased();
         let components = sentence.components(separatedBy: chararacterSet);
         let words = components.filter { !$0.isEmpty };
         
         let wordIndex = Int.random(in: 0...words.count-1)
-        let chosenWord = words[wordIndex];
+        let chosenWord = String(words[wordIndex]);
         let characterIndex = Int.random(in: 0...max(0, chosenWord.count-2)); //never pick last character
-        let newCharacter = String(characters[Int.random(in: 0...characters.count-1)]);
+        let oldCharacter = String(chosenWord[characterIndex]);
+        let charactersMod = characters.replacingOccurrences(of: oldCharacter, with: ""); // make sure we dont pick the same character
+        let newCharacter = String(charactersMod[Int.random(in: 0...charactersMod.count-1)]);
         let typoWordStart = String(characterIndex != 0 ? chosenWord[0...max(0, characterIndex-1)] : "")
         let typoWordEnd = String(characterIndex != chosenWord.count-1 ? chosenWord[characterIndex+1...chosenWord.count-1] : "")
         let typoWord = String(typoWordStart + newCharacter + typoWordEnd)
@@ -58,7 +60,7 @@ class TypoGenerator
         let fullSentence = (prefix.isEmpty ? "" : (prefix + " ")) + typoWord + (suffix.isEmpty ? "" : (" " + suffix))
         
         index += 1;
-        return TypoSentence(Prefix: prefix, Typo: String(typoWord), Correction: chosenWord, Suffix: suffix, Full: fullSentence)
+        return TypoSentence(Prefix: prefix, Typo: String(typoWord), Correction: chosenWord, Suffix: suffix, Full: fullSentence, FullCorrect: sentence)
     }
     
     public func generateSentences(num: Int) -> [TypoSentence]

@@ -13,4 +13,7 @@ struct TypoSentence {
     public let Correction: String;
     public let Suffix: String;
     public let Full: String;
+    public let FullCorrect: String;
+    
+    public static let Empty: TypoSentence = TypoSentence(Prefix: "", Typo: "", Correction: "", Suffix: "", Full: "", FullCorrect: "")
 }

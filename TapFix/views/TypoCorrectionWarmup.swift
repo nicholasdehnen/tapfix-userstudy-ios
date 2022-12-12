@@ -27,7 +27,7 @@ struct TypoCorrectionWarmup: View {
         correctionMethodExplanations = ["Long press the space bar and move your finger horizontally to position the cursor behind the faulty letter.", "Long press on the text field and use the magnifying glass to position the cursor behind the faulty letter.", "Double tap the faulty word and swipe up to delete a letter, or down to replace it."]
     }
     
-    func handleTypoCorrectionComplete()
+    func handleTypoCorrectionComplete(result: TypoCorrectionResult)
     {
         currentSentence += 1;
         navigationPath.append(currentSentence)
@@ -43,7 +43,8 @@ struct TypoCorrectionWarmup: View {
                 List {
                     Text("In the following screens, you'll be shown correction tasks of the following layout:")
                     VStack(alignment: .center) {
-                        TypoCorrectionView(typoSentence: TypoSentence(Prefix: "the cat", Typo: "frll", Correction: "fell", Suffix: "in the water", Full: "the cat frll in the water"), completionHandler: {}, preview: true)
+                        let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: TypoSentence(Prefix: "the cat", Typo: "frll", Correction: "fell", Suffix: "in the water", Full: "the cat frll in the water", FullCorrect: "the cat fell in the water"), correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in }, preview: true)
+                        TypoCorrectionView(vm: viewModel)
                     }
                     Text("Your task is to correct the mistake in the given sentence using ")+Text("only").underline()+Text(" this method:")
                     Text(correctionMethodExplanations[correctionMethod])
@@ -67,7 +68,8 @@ struct TypoCorrectionWarmup: View {
                         }
                         .padding(.horizontal)
                         .padding(.top)
-                        TypoCorrectionView(typoSentence: sentences[i], completionHandler: handleTypoCorrectionComplete)
+                        let viewModel = TypoCorrectionViewModel(id: i, typoSentence: sentences[i], correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: handleTypoCorrectionComplete)
+                        TypoCorrectionView(vm: viewModel)
                             .navigationBarBackButtonHidden(true)
                     }
                     else

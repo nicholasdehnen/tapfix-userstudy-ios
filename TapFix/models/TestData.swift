@@ -7,23 +7,35 @@
 
 import Foundation
 
+enum TypoCorrectionMethod : Codable {
+    case SpacebarSwipe
+    case TextFieldLongPress
+    case TapFix
+}
+
+enum TypoCorrectionType : Codable {
+    case Replace
+    case Delete
+}
+
 struct TypingWarmupResult : Codable {
     var Id: Int;
     var CorrectSentence: String;
     var TypedSentence: String;
-    var TaskCompletionTime: Duration;
+    var TaskCompletionTime: Double;
 }
 
 struct TypoCorrectionResult : Codable {
     var Id: Int;
-    var CorrectionMethod: String;
-    var CorrectionType: String;
+    var CorrectionMethod: TypoCorrectionMethod;
+    var CorrectionType: TypoCorrectionType;
     
     var FaultySentence: String;
     var UserCorrectedSentence: String;
     
-    var TaskCompletionTime: Duration;
-    var CursorPositioningTime: Duration;
+    var TaskCompletionTime: Double;
+    var CursorPositioningTime: Double;
+    var CharacterDeletionTime: Double;
 }
 
 struct TestData : Codable {

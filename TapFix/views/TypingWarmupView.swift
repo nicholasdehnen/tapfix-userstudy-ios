@@ -28,7 +28,7 @@ struct TypingWarmupView: View {
     func onTextFieldSubmit()
     {
         // store results
-        let result = TypingWarmupResult(Id: sentenceNo, CorrectSentence: sentences[sentenceNo], TypedSentence: text, TaskCompletionTime: Duration(secondsComponent: 0, attosecondsComponent: 0));
+        let result = TypingWarmupResult(Id: sentenceNo, CorrectSentence: sentences[sentenceNo], TypedSentence: text, TaskCompletionTime: 0);
         TestManager.shared.addTypingWarmupResult(result: result);
         
         // clear text
