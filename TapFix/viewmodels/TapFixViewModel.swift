@@ -29,27 +29,38 @@ struct TapFixCharacter
 
 class TapFixViewModel : ObservableObject
 {
-    @Published var selectedWordCharacters: [TapFixCharacter]
+    @Published var tapFixCharacters: [TapFixCharacter] = [TapFixCharacter("t", 0), TapFixCharacter("a", 1), TapFixCharacter("p", 2),
+                                                          TapFixCharacter("f", 3), TapFixCharacter("i", 4), TapFixCharacter("x", 5)]
     @Published var tapFixActive: Bool
     @Published var textInput: String
     @Published var textInputFocused: Bool
     
     @Published var activeReplaceId: Int
     
-    internal init() {
-        self.selectedWordCharacters = [TapFixCharacter("t", 0), TapFixCharacter("a", 1), TapFixCharacter("p", 2),
-                                       TapFixCharacter("f", 3), TapFixCharacter("i", 4), TapFixCharacter("x", 5)]
+    internal init(word: String = "tapfix") {
         self.tapFixActive = true
         self.textInput = ""
         self.textInputFocused = false
         self.activeReplaceId = -1
+        
+        self.tapFixCharacters = generateTapFixCharacters(word: word)
+    }
+    
+    func generateTapFixCharacters(word: String) -> [TapFixCharacter]
+    {
+        var chars: [TapFixCharacter] = []
+        for i in 0..<word.count
+        {
+            chars.append(TapFixCharacter(word[i].lowercased(), i))
+        }
+        return chars
     }
     
     func buttonDrag(direction: SwipeHVDirection, id: Int)
     {
         if(direction == .up)
         {
-            self.selectedWordCharacters = self.selectedWordCharacters.filter { $0.Id != id }
+            self.tapFixCharacters = self.tapFixCharacters.filter { $0.Id != id }
         }
         if(direction == .down)
         {
@@ -63,11 +74,11 @@ class TapFixViewModel : ObservableObject
         self.textInputFocused = false
         if(activeReplaceId != -1)
         {
-            for i in 0..<selectedWordCharacters.count
+            for i in 0..<tapFixCharacters.count
             {
-                if(selectedWordCharacters[i].Id == activeReplaceId && replacement.first != nil)
+                if(tapFixCharacters[i].Id == activeReplaceId && replacement.first != nil)
                 {
-                    selectedWordCharacters[i].Character = replacement.first!.lowercased()
+                    tapFixCharacters[i].Character = replacement.first!.lowercased()
                 }
             }
             activeReplaceId = -1

@@ -26,7 +26,7 @@ struct MainView: View {
                 .environmentObject(viewController)
                 .transition(.slide)
         case 99:
-            TapFixView(vm: TapFixViewModel())
+            TapFixView(vm: TapFixViewModel(word: "circumstances"))
         case -1:
             ErrorView(errorMessage: viewController.lastError)
         default:
