@@ -17,71 +17,37 @@ struct TapFixView: View {
         if(vm.tapFixActive)
         {
             VStack {
-                /*HStack {
-                    Spacer()
-                    ForEach(vm.tapFixCharacters, id: \.Id)
-                    { c in
-                        let textSize = CGFloat(32 * min(1, 6 / vm.tapFixCharacters.count))
-                        Button(c.Character, action: {})
-                            .buttonStyle(.bordered)
-                            .foregroundColor(.black)
-                            .fontWeight(.bold)
-                            .font(Font.system(size: 32.0, weight: .bold, design: .monospaced))
-                            .tint(vm.activeReplaceId == c.Id ? .red : .blue)
-                            .offset(self.charProps[c.Id]?.drag ?? .zero)
-                            .highPriorityGesture(
-                                DragGesture()
-                                    .onChanged({ value in
-                                        self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
-                                        self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
-                                    })
-                                    .onEnded({value in
-                                        vm.buttonDrag(direction: detectDirection(value: value), id: c.Id)
-                                        self.charProps[c.Id]?.drag = .zero
-                                    })
-                            )
-                            .opacity(self.charProps[c.Id]?.opacity ?? 100.0)
-                            .onAppear(perform: {
-                                self.charProps[c.Id] = (.zero, 100.0)
-                            })
-                    }
-                    Spacer()
-                }
-                .fixedSize(horizontal: true, vertical: false)
-                .padding(.vertical)
-                */
                 GeometryReader { geometry in
-                            
-                HStack {
-                    ForEach(vm.tapFixCharacters, id: \.Id)
-                    { c in
-                        let textSize = CGFloat(32 * min(1, 6 / vm.tapFixCharacters.count))
-                        
-                        Text(c.Character)
-                            .font(Font.system(size: 32.0, weight: .bold, design: .monospaced))
-                            .offset(self.charProps[c.Id]?.drag ?? .zero)
-                            .highPriorityGesture(
-                                DragGesture()
-                                    .onChanged({ value in
-                                        self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
-                                        self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
-                                    })
-                                    .onEnded({value in
-                                        vm.buttonDrag(direction: detectDirection(value: value), id: c.Id)
-                                        self.charProps[c.Id]?.drag = .zero
-                                    })
-                            )
-                            .frame(minWidth: 10.0, idealWidth: 40.0, maxWidth: 64.0, minHeight: 40.0, idealHeight: 50.0, maxHeight: 50.0, alignment: .center)
-                            .background(RoundedRectangle(cornerRadius: 5.0, style: RoundedCornerStyle.circular)
-                                .fill((vm.activeReplaceId == c.Id ?  Color.red : Color.blue)).opacity(0.25)
-                                .offset(self.charProps[c.Id]?.drag ?? .zero))
-                            .opacity(self.charProps[c.Id]?.opacity ?? 100.0)
-                            .onAppear(perform: {
-                                self.charProps[c.Id] = (.zero, 100.0)
-                            })
+                    
+                    HStack {
+                        ForEach(vm.tapFixCharacters, id: \.Id)
+                        { c in
+                            Text(c.Character)
+                                .font(Font.system(size: 32.0, weight: .bold, design: .monospaced))
+                                .offset(self.charProps[c.Id]?.drag ?? .zero)
+                                .highPriorityGesture(
+                                    DragGesture()
+                                        .onChanged({ value in
+                                            self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
+                                            self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
+                                        })
+                                        .onEnded({value in
+                                            vm.buttonDrag(direction: detectDirection(value: value), id: c.Id)
+                                            self.charProps[c.Id]?.opacity = 100.0
+                                            self.charProps[c.Id]?.drag = .zero
+                                        })
+                                )
+                                .frame(minWidth: 10.0, idealWidth: 40.0, maxWidth: 64.0, minHeight: 40.0, idealHeight: 50.0, maxHeight: 50.0, alignment: .center)
+                                .background(RoundedRectangle(cornerRadius: 5.0, style: RoundedCornerStyle.circular)
+                                    .fill((vm.activeReplaceId == c.Id ?  Color.red : Color.blue)).opacity(0.25)
+                                    .offset(self.charProps[c.Id]?.drag ?? .zero))
+                                .opacity(self.charProps[c.Id]?.opacity ?? 100.0)
+                                .onAppear(perform: {
+                                    self.charProps[c.Id] = (.zero, 100.0)
+                                })
+                        }
                     }
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
+                    .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
                 }
                 
                 UIKitTextField(
@@ -124,7 +90,7 @@ struct TapFixView: View {
 
 struct TapFixView_Previews: PreviewProvider {
     static var previews: some View {
-        var viewModel = TapFixViewModel(word: "tapfix")
+        let viewModel = TapFixViewModel("tapfix")
         TapFixView(vm: viewModel)
     }
 }

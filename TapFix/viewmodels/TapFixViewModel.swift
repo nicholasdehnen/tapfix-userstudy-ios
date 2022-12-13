@@ -37,16 +37,22 @@ class TapFixViewModel : ObservableObject
     
     @Published var activeReplaceId: Int
     
-    internal init(word: String = "tapfix") {
+    var onChangeHandler: (_ oldText: String, _ newText: String) -> Bool;
+    var storedText: String
+    
+    internal init(_ word: String = "tapfix",
+                  _ onChangeCallback: @escaping (_ oldText: String, _ newText: String) -> Bool = {oldText,newText in return true}) {
         self.tapFixActive = true
         self.textInput = ""
         self.textInputFocused = false
         self.activeReplaceId = -1
+        self.storedText = word
+        self.onChangeHandler = onChangeCallback
         
         self.tapFixCharacters = generateTapFixCharacters(word: word)
     }
     
-    func generateTapFixCharacters(word: String) -> [TapFixCharacter]
+    private func generateTapFixCharacters(word: String) -> [TapFixCharacter]
     {
         var chars: [TapFixCharacter] = []
         for i in 0..<word.count
@@ -56,11 +62,27 @@ class TapFixViewModel : ObservableObject
         return chars
     }
     
+    private func getTapFixCharactersAsString(_ tapFixCharacters: [TapFixCharacter]) -> String
+    {
+        var stringRep = ""
+        for c in tapFixCharacters
+        {
+            stringRep += c.Character
+        }
+        return stringRep
+    }
+    
     func buttonDrag(direction: SwipeHVDirection, id: Int)
     {
         if(direction == .up)
         {
-            self.tapFixCharacters = self.tapFixCharacters.filter { $0.Id != id }
+            self.storedText = getTapFixCharactersAsString(self.tapFixCharacters)
+            let newCharacters = self.tapFixCharacters.filter { $0.Id != id }
+            let newText = getTapFixCharactersAsString(newCharacters)
+            if newText != self.storedText && onChangeHandler(self.storedText, newText)
+            {
+                self.tapFixCharacters = newCharacters
+            }
         }
         if(direction == .down)
         {
@@ -78,7 +100,15 @@ class TapFixViewModel : ObservableObject
             {
                 if(tapFixCharacters[i].Id == activeReplaceId && replacement.first != nil)
                 {
-                    tapFixCharacters[i].Character = replacement.first!.lowercased()
+                    var changedCharacters = self.tapFixCharacters
+                    changedCharacters[i].Character = replacement.first!.lowercased()
+                
+                    let newText = getTapFixCharactersAsString(changedCharacters)
+                    let oldText = getTapFixCharactersAsString(self.tapFixCharacters)
+                    if oldText != newText && onChangeHandler(oldText, newText)
+                    {
+                        self.tapFixCharacters = changedCharacters
+                    }
                 }
             }
             activeReplaceId = -1
