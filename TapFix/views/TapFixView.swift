@@ -30,6 +30,7 @@ struct TapFixView: View {
                                         .onChanged({ value in
                                             self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
                                             self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
+                                            vm.onCharacterTouched(id: c.Id)
                                         })
                                         .onEnded({value in
                                             vm.buttonDrag(direction: detectDirection(value: value), id: c.Id)

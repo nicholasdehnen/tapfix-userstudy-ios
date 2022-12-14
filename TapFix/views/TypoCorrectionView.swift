@@ -38,7 +38,7 @@ struct TypoCorrectionView: View {
                     .foregroundColor(Color.green)
                 Text(vm.typoSentence.Suffix)
             }
-
+            
             UIKitTextField(
                 config: .init {PaddedTextField()}
                     .configure { uiTextField in
@@ -56,12 +56,19 @@ struct TypoCorrectionView: View {
                     .shouldChangeCharacters(handler: vm.shouldChangeCharacters)
                     .onBeganEditing(handler: vm.onBeganEditing)
             )
-            .disabled(vm.preview)
+            .disabled(vm.preview || vm.tapFixVisible ||
+            (vm.correctionMethod == .TapFix && vm.finishedEditing.timeIntervalSinceReferenceDate != 0))
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color(.systemGray5), lineWidth: 1)
             )
             .padding(.all, vm.preview ? 0 : nil)
+            
+            if(vm.finishedEditing.timeIntervalSinceReferenceDate != 0)
+            {
+                Button("Proceed", action: vm.calculateStatsAndFinish)
+                    .buttonStyle(.bordered)
+            }
             
             if(!vm.preview)
             {
@@ -70,13 +77,30 @@ struct TypoCorrectionView: View {
         }
         .padding()
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .overlay(tapFixOverlay)
+    }
+    @ViewBuilder private var tapFixOverlay : some View {
+        if vm.tapFixVisible {
+            let tapFixVm = TapFixViewModel(vm.tapFixWord, vm.onTapFixChange, vm.onTapFixCharacterTouched)
+            GeometryReader { geometry in
+                TapFixView(vm: tapFixVm)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5.0)
+                            .fill(UITraitCollection.current.userInterfaceStyle == .dark ? Color.black :  Color.white)
+                            .opacity(0.95)
+                            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center))
+                    .animation(.easeIn, value: vm.tapFixVisible == true)
+                    .animation(.easeOut, value: vm.tapFixVisible == false)
+                    .ignoresSafeArea(.keyboard, edges: .bottom)
+            }
+        }
     }
 }
 
 struct TypoCorrectionView_Previews: PreviewProvider {
     static var previews: some View {
         let typoSentence = TypoSentence(Prefix: "this is", Typo: "iust", Correction: "just", Suffix: "a preview", Full: "this is iust a preview", FullCorrect: "this is just a preview")
-        let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in })
+        let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in })
         TypoCorrectionView(vm: viewModel)
     }
 }

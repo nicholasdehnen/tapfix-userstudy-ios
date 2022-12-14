@@ -8,7 +8,7 @@
 import Foundation
 
 class ViewController: ObservableObject {
-    @Published var currentState: Int = 99;
+    @Published var currentState: Int = 0;
     @Published var lastError: String = "";
     
     init(){}

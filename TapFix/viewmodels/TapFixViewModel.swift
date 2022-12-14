@@ -38,16 +38,19 @@ class TapFixViewModel : ObservableObject
     @Published var activeReplaceId: Int
     
     var onChangeHandler: (_ oldText: String, _ newText: String) -> Bool;
+    var onTouchedHandler: (_ character: String, _ position: Int) -> Void
     var storedText: String
     
     internal init(_ word: String = "tapfix",
-                  _ onChangeCallback: @escaping (_ oldText: String, _ newText: String) -> Bool = {oldText,newText in return true}) {
+                  _ onChangeCallback: @escaping (_ oldText: String, _ newText: String) -> Bool = {oldText,newText in return true},
+                  _ onTouchedCallback: @escaping (_ character: String, _ position: Int) -> Void = {character,position in /*..*/}) {
         self.tapFixActive = true
         self.textInput = ""
         self.textInputFocused = false
         self.activeReplaceId = -1
         self.storedText = word
         self.onChangeHandler = onChangeCallback
+        self.onTouchedHandler = onTouchedCallback
         
         self.tapFixCharacters = generateTapFixCharacters(word: word)
     }
@@ -70,6 +73,23 @@ class TapFixViewModel : ObservableObject
             stringRep += c.Character
         }
         return stringRep
+    }
+    
+    func onCharacterTouched(id: Int)
+    {
+        var offset = -1
+        var character = "?"
+        for i in 0..<tapFixCharacters.count
+        {
+            if tapFixCharacters[i].Id == id
+            {
+                offset = i
+                character = tapFixCharacters[i].Character
+                break
+            }
+        }
+        
+        self.onTouchedHandler(character, offset)
     }
     
     func buttonDrag(direction: SwipeHVDirection, id: Int)

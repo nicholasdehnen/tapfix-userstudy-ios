@@ -20,6 +20,10 @@ class TypoCorrectionViewModel : ObservableObject
     @Published var finishedSelecting: Date;
     @Published var finishedEditing: Date;
     
+    @Published var tapFixWord: String;
+    @Published var tapFixVisible: Bool;
+    var tapFixRange: NSRange;
+    
     let completionHandler: (TypoCorrectionResult) -> Void;
     let preview: Bool;
     
@@ -51,18 +55,24 @@ class TypoCorrectionViewModel : ObservableObject
         self.completionHandler = completionHandler
         self.preview = preview
         
+        self.tapFixWord = "tapfix"
+        self.tapFixVisible = false
+        self.tapFixRange = NSRange()
+        
         self.typoDeletedSentence = typoSentence.Full
         self.typoPosition = calculateTypoIndex()
         self.typoDeletedSentence.remove(at: typoDeletedSentence.index(typoDeletedSentence.startIndex, offsetBy: typoPosition))
     }
     
-    private func calculateTypoIndex() -> Int
+    private func calculateTypoIndex(local: Bool = false) -> Int
     {
         var index = -1;
-        for i in 0..<typoSentence.Full.count
+        var typoStr = local ? typoSentence.Typo : typoSentence.Full
+        var correctStr = local ? typoSentence.Correction : typoSentence.FullCorrect
+        for i in 0..<typoStr.count
         {
-            let charA = typoSentence.Full[i];
-            let charB = typoSentence.FullCorrect[i];
+            let charA = typoStr[i];
+            let charB = correctStr[i];
             
             if(charA != charB)
             {
@@ -73,15 +83,15 @@ class TypoCorrectionViewModel : ObservableObject
         return index;
     }
     
-    private func calculateStatsAndFinish()
+    func calculateStatsAndFinish()
     {
         let result = TypoCorrectionResult(Id: self.taskId, CorrectionMethod: self.correctionMethod, CorrectionType: self.correctionType, FaultySentence: self.typoSentence.Full, UserCorrectedSentence: self.typoSentence.FullCorrect, TaskCompletionTime: beganEditing.distance(to: finishedEditing), CursorPositioningTime: beganEditing.distance(to: finishedSelecting), CharacterDeletionTime: beganEditing.distance(to: finishedRemovingFaulty))
         self.completionHandler(result);
         
-        print("- task stats -")
-        print("task completion time: " + (beganEditing.distance(to: finishedEditing)).description)
-        print("selection time part: " + (beganEditing.distance(to: finishedSelecting)).description)
-        print("character deletion part: " + (beganEditing.distance(to: finishedRemovingFaulty)).description)
+        debugPrint("- task stats -")
+        debugPrint("task completion time: " + (beganEditing.distance(to: finishedEditing)).description)
+        debugPrint("selection time part: " + (beganEditing.distance(to: finishedSelecting)).description)
+        debugPrint("character deletion part: " + (beganEditing.distance(to: finishedRemovingFaulty)).description)
     }
     
     func shouldReturn(textField: PaddedTextField) -> Bool
@@ -128,10 +138,10 @@ class TypoCorrectionViewModel : ObservableObject
             newText.insert(replacementString.first!, at: userText.index(userText.startIndex, offsetBy: range.location));
             
             // compare corrected sentence against expected result
-            if(newText.compare(typoSentence.FullCorrect, options: .caseInsensitive) == .orderedSame)
+            if(newText == typoSentence.FullCorrect)
             {
-                textField.text = newText;
                 self.finishedEditing = Date.now;
+                textField.text = newText;
             }
         }
         return false;
@@ -152,7 +162,7 @@ class TypoCorrectionViewModel : ObservableObject
             self.beganSelecting = Date.now
         }
         
-        if(userText.compare(typoSentence.Full) != .orderedSame
+        if(finishedEditing.timeIntervalSinceReferenceDate == 0 && userText.compare(typoSentence.Full) != .orderedSame
            && userText.compare(typoDeletedSentence) != .orderedSame)
         {
             // user made an error, reset the whole test
@@ -171,19 +181,86 @@ class TypoCorrectionViewModel : ObservableObject
             // set finishedSelecting once user moves cursor to correct position
             // note: this also sets finishedSelecting if user "overshoots"..
             // .. but this doesnt matter since the user has to move the cursor back to correct the text, thus overwriting it again (only if not finished editing yet)
-            if(finishedEditing.timeIntervalSinceReferenceDate == 0 && cursorPosition == typoPosition+1)
+            if(finishedEditing.timeIntervalSinceReferenceDate == 0
+               && cursorPosition == (typoPosition + (correctionType == .Replace ? 0 : 1))) // add 1 to typo position if deletion task
             {
                 finishedSelecting = Date.now
             }
             
-            // dont allow user to select ranges, only move cursor
+            // range selection only valid for tapfix (opens it), otherwise only allow cursor movement
             if(selectedRange.end != textField.position(from: selectedRange.start, offset: 0)) {
-                // get last legal position
-                textField.selectedTextRange = lastLegalTextRange
+                if(self.correctionMethod == TypoCorrectionMethod.TapFix)
+                {
+                    // open tapfix
+                    if let tapFixWord_ = textField.text(in: selectedRange)
+                    {
+                        // as part of user study, only open tapfix when correct selection is made
+                        // (same behaviour as with deletion / selection on other methods)
+                        if(tapFixWord_ == typoSentence.Typo)
+                        {
+                            self.beganSelecting = Date.now
+                            self.tapFixWord = tapFixWord_
+                            self.tapFixVisible = true
+                        }
+                    }
+                    textField.selectedTextRange = nil
+                }
+                else
+                {
+                    // return to last legal position
+                    textField.selectedTextRange = lastLegalTextRange
+                }
             } else {
                 // store as last legal position
-                lastLegalTextRange = selectedRange;
+                lastLegalTextRange = selectedRange
             }
         }
+    }
+    
+    func onTapFixCharacterTouched(character: String, offset: Int) {
+        if(calculateTypoIndex(local: true) == offset && finishedSelecting.timeIntervalSinceReferenceDate == 0)
+        {
+            finishedSelecting = Date.now
+        }
+    }
+    
+    func onTapFixChange(oldText: String, newText: String) -> Bool {
+        if let stringRange = userText.range(of: oldText)
+        {
+            let now = Date.now
+            var newString = userText
+            var deletionString = userText
+            
+            newString.replaceSubrange(stringRange, with: newText)
+            deletionString.remove(at: userText.index(userText.startIndex, offsetBy: self.typoPosition))
+            
+            //check if user finished deleting character
+            if(deletionString == newString)
+            {
+                self.finishedRemovingFaulty = now
+            }
+            
+            //check if user finished task
+            if(newText == self.typoSentence.Correction)
+            {
+                self.finishedRemovingFaulty = now
+                self.finishedEditing = now
+            }
+            
+            //replace text and close tapfix again
+            self.userText.replaceSubrange(stringRange, with: newText)
+            self.tapFixVisible = false //close tapfix again
+        }
+        return true
+    }
+}
+
+// from: https://stackoverflow.com/a/38805072
+extension UITextInput {
+    var selectedRange: NSRange? {
+        guard let range = selectedTextRange else { return nil }
+        let location = offset(from: beginningOfDocument, to: range.start)
+        let length = offset(from: range.start, to: range.end)
+        return NSRange(location: location, length: length)
     }
 }

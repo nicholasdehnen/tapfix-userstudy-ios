@@ -9,10 +9,10 @@ import SwiftUI
 
 struct TypingWarmupView: View {
     
-    private let SENTENCE_COUNT: Int = 2
     @State private var sentences: [String] = ["Loading, please wait.."]
-    @State private var sentenceNo: Int = 0
+    @State private var sentenceNo: Int = -1
     @State private var text: String = ""
+    @State private var ignoredString = ""
     @State private var previousText: String = ""
     @FocusState private var textFieldFocused: Bool
     @EnvironmentObject var viewController: ViewController;
@@ -44,9 +44,54 @@ struct TypingWarmupView: View {
         viewController.next();
     }
     
+    
     var body: some View {
         VStack {
-            if(sentenceNo < SENTENCE_COUNT){
+            if(sentenceNo < 0)
+            {
+                Text("Typing Warmup")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.top)
+                VStack (alignment: .leading) {
+                    Text("In the following screens, you will be shown typing tasks of the following layout:")
+                    Divider()
+                    VStack {
+                        Text("Please copy the following sentence:")
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                            .padding(.bottom, 2.0)
+                        Text(sentences.last ?? "the exam was too hard")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                        Image(systemName: "arrow.down").padding(.top, 1.0)
+                        TextField("Type here..", text: $ignoredString)
+                            .disabled(true)
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    }.padding(.vertical)
+                    Divider()
+                    Text("Copy the sentences as fast and accurately as possible.")
+                        .padding(.vertical, 2.0)
+                    Divider()
+                    VStack(alignment: .leading) {
+                        Text("Note: All input is final.\nYou will not be able to correct any mistakes.")
+                            .font(.headline)
+                    }
+                    Divider()
+                    VStack(alignment: .leading) {
+                        Text("Time measurement will start the moment you touch the text field. Press the button below to continue.")
+                    }
+                }.padding()
+                VStack(alignment: .center) {
+                    Button("Start warm-up..") {
+                        sentenceNo += 1
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            else if(sentenceNo < TestManager.TypingTestLength){
                 Text("Please copy the following sentence:")
                     .frame(maxWidth: .infinity)
                     .clipped()
@@ -54,6 +99,7 @@ struct TypingWarmupView: View {
                 Text(sentences[sentenceNo])
                     .font(.headline)
                     .frame(maxWidth: .infinity)
+                Image(systemName: "arrow.down").padding(.top, 1.0)
                 TextField("Type here..", text: $text)
                     .keyboardType(.alphabet)
                     .disableAutocorrection(true)

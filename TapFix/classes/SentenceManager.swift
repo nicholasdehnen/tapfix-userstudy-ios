@@ -20,7 +20,7 @@ class SentenceManager {
         if let path = Bundle.main.path(forResource: "phrases2", ofType: "txt") {
           do {
               let sentencesString = try String(contentsOfFile: path, encoding: .utf8);
-              sentences = sentencesString.components(separatedBy: .newlines)
+              sentences = sentencesString.components(separatedBy: .newlines).map{ $0.lowercased() }
           } catch let error {
               SentenceManager.Error = true;
               SentenceManager.ErrorMessage = error.localizedDescription;

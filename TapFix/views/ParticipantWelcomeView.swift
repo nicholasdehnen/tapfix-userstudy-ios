@@ -13,9 +13,11 @@ struct ParticipantWelcomeView: View {
     
     @State private var participantId: String = "";
     @EnvironmentObject var viewController: ViewController;
-    private let ID_LENGTH_LIMIT: Int = 5;
+    @FocusState var inputFocused;
     
     func proceed() {
+        inputFocused = false;
+        TestManager.shared.setParticipantId(id: Int(participantId) ?? 11111)
         viewController.next();
     }
     
@@ -32,6 +34,7 @@ struct ParticipantWelcomeView: View {
             TextField("Enter your participant id..", text: $participantId)
                 .textFieldStyle(.roundedBorder)
                 .keyboardType(.numberPad)
+                .focused($inputFocused)
                 .onReceive(Just(participantId)) { newValue in
                     // filter out non-numbers
                     let filtered = newValue.filter { "0123456789".contains($0) }
@@ -40,10 +43,11 @@ struct ParticipantWelcomeView: View {
                     }
                     
                     // limit length to ID_LENGTH_LIMIT
-                    if newValue.count > ID_LENGTH_LIMIT {
-                        participantId = String(participantId.prefix(ID_LENGTH_LIMIT))
+                    if newValue.count > TestManager.ParticipantIdLength {
+                        participantId = String(participantId.prefix(TestManager.ParticipantIdLength))
                     };
                 }
+                .frame(width: 250)
                 .padding()
                 .multilineTextAlignment(/*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
                 

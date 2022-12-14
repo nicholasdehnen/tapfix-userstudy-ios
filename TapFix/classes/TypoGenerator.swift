@@ -41,9 +41,8 @@ class TypoGenerator
         return (prefix, suffix, fullSentence)
     }
     
-    private func _generateReplaceTypeSentence(sentence: String, words: [String]) -> TypoSentence
+    private func _generateReplaceTypeSentence(sentence: String, words: [String], wordIndex: Int) -> TypoSentence
     {
-        let wordIndex = Int.random(in: 0...words.count-1)
         let chosenWord = String(words[wordIndex]);
         let characterIndex = Int.random(in: 0...max(0, chosenWord.count-2)); //never pick last character
         let oldCharacter = String(chosenWord[characterIndex]);
@@ -58,11 +57,16 @@ class TypoGenerator
         return TypoSentence(Prefix: prefix, Typo: String(typoWord), Correction: chosenWord, Suffix: suffix, Full: fullSentence, FullCorrect: sentence)
     }
     
-    private func _generateDeleteTypeSentence(sentence: String, words: [String]) -> TypoSentence
+    private func _generateDeleteTypeSentence(sentence: String, words: [String], wordIndex: Int) -> TypoSentence
     {
-        let wordIndex = Int.random(in: 0...words.count-1)
         let chosenWord = String(words[wordIndex]);
         let characterIndex = Int.random(in: 0...max(0, chosenWord.count-2)); //never pick last character
+        // do not substitute for same character as before or after chosen character
+        var charactersMod = characters
+        for i in max(0, characterIndex-1)..<min(chosenWord.count-1, characterIndex+1)
+        {
+            charactersMod = charactersMod.replacingOccurrences(of: String(chosenWord[i]), with: "");
+        }
         let newCharacter = String(characters[Int.random(in: 0...characters.count-1)]);
         let typoWordStart = String(characterIndex != 0 ? chosenWord[0...max(0, characterIndex-1)] : "")
         let typoWordEnd = String(characterIndex != chosenWord.count-1 ? chosenWord[characterIndex...chosenWord.count-1] : "")
@@ -78,15 +82,20 @@ class TypoGenerator
         let sentence = sentences[index % (sentences.count-1)].lowercased();
         let components = sentence.components(separatedBy: chararacterSet);
         let words = components.filter { !$0.isEmpty };
+        var wordIndex = Int.random(in: 0...words.count-1)
+        while(words[wordIndex].count == 1) // do not select words of length 1, no real life application
+        {
+            wordIndex = Int.random(in: 0...words.count-1)
+        }
         
         index += 1;
         
         switch(type)
         {
         case TypoCorrectionType.Replace:
-            return _generateReplaceTypeSentence(sentence: sentence, words: words)
+            return _generateReplaceTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex)
         case TypoCorrectionType.Delete:
-            return _generateDeleteTypeSentence(sentence: sentence, words: words)
+            return _generateDeleteTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex)
         }
     }
     

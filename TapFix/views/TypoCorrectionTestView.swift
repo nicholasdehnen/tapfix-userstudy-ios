@@ -11,40 +11,27 @@ struct TypoCorrectionTestView: View {
     
     @EnvironmentObject var viewController: ViewController;
     @State private var navigationPath = NavigationPath();
+    @StateObject var vm: TypoCorrectionTestViewModel
     
-    @State private var currentSentence: Int = 0;
-    private let isWarmup: Bool;
-    private let correctionCount: Int = 3;
-    private var sentences: [TypoSentence];
-    private let typoGenerator: TypoGenerator;
-    private let correctionMethod: TypoCorrectionMethod;
-    private let correctionType: TypoCorrectionType;
-    private let correctionMethodExplanations: [TypoCorrectionMethod : String];
-    
-    init(correctionMethod: TypoCorrectionMethod, correctionType: TypoCorrectionType, warmup: Bool = false)
-    {
-        typoGenerator = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true, randomSeed: UInt64(TestManager.shared.testData.ParticipantId)))
-        sentences = typoGenerator.generateSentences(num: correctionCount, type: correctionType)
-        self.correctionMethod = correctionMethod
-        self.correctionType = correctionType
-        self.isWarmup = warmup
-        correctionMethodExplanations = [
-            TypoCorrectionMethod.SpacebarSwipe: "Long press the space bar and move your finger horizontally to position the cursor behind the faulty letter.",
-            TypoCorrectionMethod.TextFieldLongPress: "Long press on the text field and use the magnifying glass to position the cursor behind the faulty letter.",
-            TypoCorrectionMethod.TapFix: "Double tap the faulty word and swipe up to delete a letter, or down to replace it."]
-    }
+    private let correctionMethodExplanations: [TypoCorrectionMethod : String] = [
+        TypoCorrectionMethod.SpacebarSwipe: "Long press the space bar and move your finger horizontally to position the cursor behind the faulty letter.",
+        TypoCorrectionMethod.TextFieldLongPress: "Long press on the text field and use the magnifying glass to position the cursor behind the faulty letter.",
+        TypoCorrectionMethod.TapFix: "Double tap the faulty word and swipe up to delete a letter, or down to replace it."]
     
     func handleTypoCorrectionComplete(result: TypoCorrectionResult)
     {
-        currentSentence += 1;
-        TestManager.shared.addTypoCorrectionResult(result: result)
-        navigationPath.append(currentSentence)
+        vm.currentSentence += 1;
+        if(!vm.isWarmup)
+        {
+            TestManager.shared.addTypoCorrectionResult(result: result)
+        }
+        navigationPath.append(vm.currentSentence)
     }
     
     var body: some View {
         NavigationStack(path: $navigationPath) {
             VStack {
-                Text("Typo Correction " + (isWarmup ? "Warmup" : "Test"))
+                Text("Typo Correction " + (vm.isWarmup ? "Warmup" : "Test"))
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.top)
@@ -52,7 +39,7 @@ struct TypoCorrectionTestView: View {
                     HStack {
                         Text("Task: ")
                             .fontWeight(.bold)
-                        switch(correctionType)
+                        switch(vm.correctionType)
                         {
                         case .Replace:
                             Text("Correct typos in sentence.")
@@ -63,7 +50,7 @@ struct TypoCorrectionTestView: View {
                     HStack {
                         Text("Method: ")
                             .fontWeight(.bold)
-                        switch(correctionMethod)
+                        switch(vm.correctionMethod)
                         {
                         case .SpacebarSwipe:
                             Text("Swiping on space bar.")
@@ -75,33 +62,33 @@ struct TypoCorrectionTestView: View {
                     }
                     Text("In the following screens, you'll be shown correction tasks of the following layout:")
                     VStack(alignment: .center) {
-                        let example = typoGenerator.generateSentence(type: correctionType)
+                        let example = vm.sentences.last!
                         let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: example, correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in }, preview: true)
                         TypoCorrectionView(vm: viewModel)
                     }
                     Text("Your task is to correct the mistake in the given sentence using ")+Text("only").underline()+Text(" this method:")
-                    Text(correctionMethodExplanations[correctionMethod]!)
+                    Text(correctionMethodExplanations[vm.correctionMethod]!)
                         .italic()
                     Text("Do this as fast and accurately as possible.")
                     Text("Time measurement will start the moment you touch the text field. Press the button below to continue.")
                 }
                 .padding(.horizontal)
                 .listStyle(.plain)
-                Button("Start " + (isWarmup ? "warm-up" : "testing") + "..") {
-                    navigationPath.append(currentSentence)
+                Button("Start " + (vm.isWarmup ? "warm-up" : "testing") + "..") {
+                    navigationPath.append(vm.currentSentence)
                 }
                 .buttonStyle(.bordered)
             }
             .navigationDestination(for: Int.self) { i in
                 VStack {
-                    if(i < correctionCount)
+                    if(i < vm.correctionCount)
                     {
-                        ProgressView(value: Double(i) / Double(correctionCount)) {
-                                Text("Sentence \(i+1) out of \(correctionCount)")
+                        ProgressView(value: Double(i) / Double(vm.correctionCount)) {
+                            Text("Sentence \(i+1) out of \(vm.correctionCount)")
                         }
                         .padding(.horizontal)
                         .padding(.top)
-                        let viewModel = TypoCorrectionViewModel(id: i, typoSentence: sentences[i], correctionMethod: correctionMethod, correctionType: correctionType, completionHandler: handleTypoCorrectionComplete)
+                        let viewModel = TypoCorrectionViewModel(id: i, typoSentence: vm.sentences[i], correctionMethod: vm.correctionMethod, correctionType: vm.correctionType, completionHandler: handleTypoCorrectionComplete)
                         TypoCorrectionView(vm: viewModel)
                             .navigationBarBackButtonHidden(true)
                     }
@@ -112,9 +99,10 @@ struct TypoCorrectionTestView: View {
                             Text("Done!")
                                 .font(.title)
                                 .padding()
-                            Text("The typo-correction " + (isWarmup ? "warm-up" : "test") + " is now complete.")
+                            Text("The typo-correction " + (vm.isWarmup ? "warm-up" : "test") + " is now complete.")
                             Button("Continue") {
-                                viewController.next()
+                                vm.completionHandler()
+                                navigationPath = NavigationPath()
                             }
                             .buttonStyle(.bordered)
                             Spacer()
@@ -129,6 +117,7 @@ struct TypoCorrectionTestView: View {
 
 struct TypoCorrectionWarmup_Previews: PreviewProvider {
     static var previews: some View {
-        TypoCorrectionTestView(correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Delete)
+        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Delete, isWarmup: false)
+        TypoCorrectionTestView(vm: viewModel)
     }
 }
