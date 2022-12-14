@@ -63,7 +63,7 @@ class TypoGenerator
         let characterIndex = Int.random(in: 0...max(0, chosenWord.count-2)); //never pick last character
         // do not substitute for same character as before or after chosen character
         var charactersMod = characters
-        for i in max(0, characterIndex-1)..<min(chosenWord.count-1, characterIndex+1)
+        for i in max(0, characterIndex-1)...min(chosenWord.count-1, characterIndex+1)
         {
             charactersMod = charactersMod.replacingOccurrences(of: String(chosenWord[i]), with: "");
         }

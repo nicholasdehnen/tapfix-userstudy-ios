@@ -17,7 +17,16 @@ struct TypingWarmupView: View {
     @FocusState private var textFieldFocused: Bool
     @EnvironmentObject var viewController: ViewController;
     
-    func onTextFieldChange_preventDeletion(_: String) {
+    @State var startDate = Date(timeIntervalSinceReferenceDate: 0)
+    
+    func onTextFieldChange(_: String) {
+        // record time
+        if(startDate.timeIntervalSinceReferenceDate == 0)
+        {
+            startDate = Date.now
+        }
+        
+        // prevent deletion
         if text.count < previousText.count {
             self.text = previousText
         } else {
@@ -27,8 +36,11 @@ struct TypingWarmupView: View {
     
     func onTextFieldSubmit()
     {
+        // calculate time
+        let timeTaken = startDate.distance(to: Date.now)
+        
         // store results
-        let result = TypingWarmupResult(Id: sentenceNo, CorrectSentence: sentences[sentenceNo], TypedSentence: text, TaskCompletionTime: 0);
+        let result = TypingWarmupResult(Id: sentenceNo, CorrectSentence: sentences[sentenceNo], TypedSentence: text, TaskCompletionTime: timeTaken);
         TestManager.shared.addTypingWarmupResult(result: result);
         
         // clear text
@@ -107,7 +119,7 @@ struct TypingWarmupView: View {
                     .textFieldStyle(.roundedBorder)
                     .multilineTextAlignment(.center)
                     .padding()
-                    .onChange(of: self.text, perform: onTextFieldChange_preventDeletion)
+                    .onChange(of: self.text, perform: onTextFieldChange)
                     .onSubmit(onTextFieldSubmit)
                     .focused($textFieldFocused)
             }

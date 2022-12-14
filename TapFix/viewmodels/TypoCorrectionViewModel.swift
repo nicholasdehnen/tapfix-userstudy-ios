@@ -67,8 +67,8 @@ class TypoCorrectionViewModel : ObservableObject
     private func calculateTypoIndex(local: Bool = false) -> Int
     {
         var index = -1;
-        var typoStr = local ? typoSentence.Typo : typoSentence.Full
-        var correctStr = local ? typoSentence.Correction : typoSentence.FullCorrect
+        let typoStr = local ? typoSentence.Typo : typoSentence.Full
+        let correctStr = local ? typoSentence.Correction : typoSentence.FullCorrect
         for i in 0..<typoStr.count
         {
             let charA = typoStr[i];
@@ -158,6 +158,12 @@ class TypoCorrectionViewModel : ObservableObject
     
     func onChangedSelection(textField: PaddedTextField)
     {
+        if(self.beganEditing.timeIntervalSinceReferenceDate == 0)
+        {
+            //corner case: began selecting without onBeganEditing called?
+            self.beganEditing = Date.now
+        }
+        
         if(self.beganEditing.timeIntervalSinceReferenceDate != 0 && self.beganSelecting.timeIntervalSinceReferenceDate == 0) {
             self.beganSelecting = Date.now
         }
