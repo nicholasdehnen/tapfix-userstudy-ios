@@ -39,6 +39,7 @@ struct TypoCorrectionResult : Codable {
 }
 
 struct TestData : Codable {
+    var AppVersion: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown";
     var ParticipantId: Int = 0;
     var TimeStamp: Date = Date.now;
     
