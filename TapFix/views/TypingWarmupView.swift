@@ -43,12 +43,16 @@ struct TypingWarmupView: View {
         let result = TypingWarmupResult(Id: sentenceNo, CorrectSentence: sentences[sentenceNo], TypedSentence: text, TaskCompletionTime: timeTaken);
         TestManager.shared.addTypingWarmupResult(result: result);
         
+        // log some stats
+        print("Typing warmup: Completed sentence \(sentenceNo+1). Time taken: \(timeTaken)s. Expected: '\(sentences[sentenceNo])'. Typed: '\(text)'.")
+        
         // clear text
         previousText = "";
         text = "";
-        
+                
         // advance
         sentenceNo += 1;
+        startDate = Date(timeIntervalSinceReferenceDate: 0); // reset start date (important!)
         textFieldFocused = true;
     }
     
