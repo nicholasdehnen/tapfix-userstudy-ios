@@ -99,7 +99,8 @@ struct TypoCorrectionView: View {
 
 struct TypoCorrectionView_Previews: PreviewProvider {
     static var previews: some View {
-        let typoSentence = TypoSentence(Prefix: "this is", Typo: "iust", Correction: "just", Suffix: "a preview", Full: "this is iust a preview", FullCorrect: "this is just a preview")
+        //let typoSentence = TypoSentence(Prefix: "this is", Typo: "iust", Correction: "just", Suffix: "a preview", Full: "this is iust a preview", FullCorrect: "this is just a preview")
+        let typoSentence = TypoSentence(Prefix: "well connected with", Typo: "pfople", Correction: "people", Suffix: "", Full: "well connected with pfople", FullCorrect: "well connected with people")
         let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in })
         TypoCorrectionView(vm: viewModel)
     }
