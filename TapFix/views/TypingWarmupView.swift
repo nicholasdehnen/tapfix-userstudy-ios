@@ -107,7 +107,7 @@ struct TypingWarmupView: View {
                     .buttonStyle(.bordered)
                 }
             }
-            else if(sentenceNo < TestManager.TypingTestLength){
+            else if(sentenceNo < TestManager.shared.TypingTestLength){
                 Text("Please copy the following sentence:")
                     .frame(maxWidth: .infinity)
                     .clipped()

@@ -8,6 +8,14 @@
 import SwiftUI
 import UIKitTextField
 
+
+prefix func ! (value: Binding<Bool>) -> Binding<Bool> {
+    Binding<Bool>(
+        get: { !value.wrappedValue },
+        set: { value.wrappedValue = !$0 }
+    )
+}
+
 class PaddedTextField: BaseUITextField {
   var padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8) {
     didSet {

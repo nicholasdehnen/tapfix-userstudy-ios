@@ -8,7 +8,8 @@
 import Foundation
 import GameplayKit
 
-class TestManager {
+//@MainActor
+class TestManager : ObservableObject {
     
     var documentsDirectory: URL;
     var testDataFile: URL;
@@ -17,15 +18,24 @@ class TestManager {
     var testDataFileSet: Bool = false;
     let jsonEncoder: JSONEncoder;
     
-    var skipWarmups: Bool = false
-    var skipTypingTest: Bool = false
+    var ParticipantId: Int {
+        get {
+            testData.ParticipantId
+        }
+        set(val) {
+            objectWillChange.send()
+            testData.ParticipantId = val
+        }
+    }
+    @Published var TypingTestLength: Int = 20
+    @Published var TestLength: Int = 30
+    @Published var WarmupLength: Int = 15 // * 2 (replace, delete)
     
-    var finalTestOrder: [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)] = []
+    @Published var SkipWarmups: Bool = false
+    @Published var SkipTypingTest: Bool = false
     
-    static let ParticipantIdLength: Int = 5
-    static let TypingTestLength: Int = 20
-    static let TestLength: Int = 30
-    static let WarmupLength: Int = 15 // * 2 (replace, delete)
+    @Published var TestOrder: [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)] = []
+    
     
     static let shared = TestManager()
     private init()
@@ -79,19 +89,19 @@ class TestManager {
         return testIdentifier
     }
     
-    func setParticipantId(id: Int)
-    {
-        testData.ParticipantId = id;
-        let idstr = String(id)
-        if(idstr.starts(with: "9"))
-        {
-            skipWarmups = true
-        }
-        if(idstr[1...].starts(with: "9"))
-        {
-            skipTypingTest = true
-        }
-    }
+    //func setParticipantId(id: Int)
+    //{
+    //    testData.ParticipantId = id;
+    //    let idstr = String(id)
+    //    if(idstr.starts(with: "9"))
+    //    {
+    //        skipWarmups = true
+    //    }
+    //    if(idstr[1...].starts(with: "9"))
+    //    {
+    //        skipTypingTest = true
+    //    }
+    //}
     
     func addTypingWarmupResult(result: TypingWarmupResult)
     {
@@ -105,12 +115,14 @@ class TestManager {
         _updateResultsFile();
     }
 
-    func generateTestOrder() -> [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)]
+    @discardableResult
+    func generateTestOrder(regenerate: Bool = false) -> [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)]
     {
-        if(finalTestOrder.count != 0)
+        if(!regenerate && TestOrder.count != 0)
         {
-            return finalTestOrder
+            return TestOrder
         }
+        TestOrder.removeAll(keepingCapacity: true)
         
         let mersenneTwister = GKMersenneTwisterRandomSource(seed: UInt64(testData.ParticipantId))
         let mandatoryTests: [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)] = [
@@ -134,12 +146,12 @@ class TestManager {
             let test = shuffledTests[i] as (method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)
             if methodsSeen[test.method]! == false {
                 // prepend warmup
-                finalTestOrder.append((test.method, test.type, true))
+                TestOrder.append((test.method, test.type, true))
                 methodsSeen[test.method] = true
             }
-            finalTestOrder.append(test)
+            TestOrder.append(test)
         }
         
-        return finalTestOrder
+        return TestOrder
     }
 }

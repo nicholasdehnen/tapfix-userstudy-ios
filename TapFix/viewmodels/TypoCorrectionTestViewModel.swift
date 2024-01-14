@@ -25,11 +25,11 @@ class TypoCorrectionTestViewModel: ObservableObject {
         self.correctionMethod = correctionMethod
         self.correctionType = correctionType
         self.isWarmup = isWarmup
-        self.correctionCount = isWarmup ? TestManager.WarmupLength : TestManager.TestLength
+        self.correctionCount = isWarmup ? TestManager.shared.WarmupLength : TestManager.shared.TestLength
         self.completionHandler = onCompletion
         typoGenerator = TypoGenerator(sentences: SentenceManager.shared.getSentences(
             shuffle: true,
-            randomSeed: isWarmup ? UInt64.random(in: UInt64(pow(10.0, Double(TestManager.ParticipantIdLength)))..<UInt64.max) : UInt64(TestManager.shared.testData.ParticipantId)))
+            randomSeed: isWarmup ? UInt64.random(in: UInt64(pow(10.0, 5))..<UInt64.max) : UInt64(TestManager.shared.testData.ParticipantId)))
         self.sentences = typoGenerator.generateSentences(num: self.correctionCount, type: self.correctionType)
     }
 }

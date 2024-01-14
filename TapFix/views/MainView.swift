@@ -18,8 +18,11 @@ struct MainView: View {
         switch(viewController.currentState)
         {
         case 0:
-            ParticipantWelcomeView().environmentObject(viewController)
+            StudySetupView().environmentObject(viewController)
                 .transition(.slide)
+        //case 999:
+        //    ParticipantWelcomeView().environmentObject(viewController)
+        //        .transition(.slide)
         case 1:
             IntroductionView()
                 .environmentObject(viewController)
