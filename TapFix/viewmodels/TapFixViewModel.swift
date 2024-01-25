@@ -5,6 +5,7 @@
 //  Created by Nicholas Dehnen on 2022-12-12.
 //
 
+import SwiftUI
 import Foundation
 import UIKitTextField
 
@@ -40,18 +41,19 @@ class TapFixViewModel : ObservableObject
     var onChangeHandler: (_ oldText: String, _ newText: String) -> Bool;
     var onTouchedHandler: (_ character: String, _ position: Int) -> Void
     var storedText: String
+    var characterSize: CGSize
     
     internal init(_ word: String = "tapfix",
                   _ onChangeCallback: @escaping (_ oldText: String, _ newText: String) -> Bool = {oldText,newText in return true},
                   _ onTouchedCallback: @escaping (_ character: String, _ position: Int) -> Void = {character,position in /*..*/}) {
         self.tapFixActive = true
         self.textInput = ""
-        self.textInputFocused = false
+        self.textInputFocused = true // used to be: false, now always focussed.
         self.activeReplaceId = -1
         self.storedText = word
         self.onChangeHandler = onChangeCallback
         self.onTouchedHandler = onTouchedCallback
-        
+        self.characterSize = CGSize()
         self.tapFixCharacters = generateTapFixCharacters(word: word)
     }
     
@@ -75,6 +77,32 @@ class TapFixViewModel : ObservableObject
         return stringRep
     }
     
+    private func swapTapFixCharacters(id0: Int, id1: Int) -> Bool
+    {
+        var i0 = -1
+        var i1 = -1
+        
+        for i in 0..<self.tapFixCharacters.count {
+            if self.tapFixCharacters[i].Id == id0 {
+                i0 = i
+            }
+            else if self.tapFixCharacters[i].Id == id1 {
+                i1 = i
+            }
+        }
+        
+        if i0 == -1 || i1 == -1 {
+            return false
+        }
+        
+        var tmp_id = self.tapFixCharacters[i0].Id
+        self.tapFixCharacters[i0].Id = self.tapFixCharacters[i1].Id
+        self.tapFixCharacters[i1].Id = tmp_id
+        
+        self.tapFixCharacters.swapAt(i0, i1)
+        return true
+    }
+    
     func onCharacterTouched(id: Int)
     {
         var offset = -1
@@ -92,7 +120,11 @@ class TapFixViewModel : ObservableObject
         self.onTouchedHandler(character, offset)
     }
     
-    func buttonDrag(direction: SwipeHVDirection, id: Int)
+    func updateCharacterSize(id: Int, size: CGSize) {
+        self.characterSize = size
+    }
+    
+    func buttonDrag(direction: SwipeHVDirection, id: Int, dragTarget: Int = -1)
     {
         if(direction == .up)
         {
@@ -104,16 +136,29 @@ class TapFixViewModel : ObservableObject
                 self.tapFixCharacters = newCharacters
             }
         }
+        
         if(direction == .down)
         {
-            self.textInputFocused = true
+            //self.textInputFocused = true
             self.activeReplaceId = id
+        }
+        
+        if(dragTarget != -1) {
+            
+            let charIndex = Int(self.tapFixCharacters.firstIndex(where: { $0.Id == id }) ?? 0)
+            
+            let el = self.tapFixCharacters.remove(at: charIndex)
+            self.tapFixCharacters.insert(el, at: dragTarget)
+        
+            
+            self.storedText = getTapFixCharactersAsString(self.tapFixCharacters)
         }
     }
     
     func keyboardInput(textField: BaseUITextField, range: NSRange, replacement: String) -> Bool
     {
-        self.textInputFocused = false
+        //textInput is now always focussed to allow for input. TODO: See if constant textInput focus has bad consequences.
+        //self.textInputFocused = false
         if(activeReplaceId != -1)
         {
             for i in 0..<tapFixCharacters.count
@@ -132,6 +177,15 @@ class TapFixViewModel : ObservableObject
                 }
             }
             activeReplaceId = -1
+        }
+        else
+        {
+            // TODO: Smarter insert, use ML model here?
+            let chars = getTapFixCharactersAsString(self.tapFixCharacters) + replacement
+            if onChangeHandler(self.storedText, chars)
+            {
+                self.tapFixCharacters = generateTapFixCharacters(word: chars)
+            }
         }
         return false
     }
