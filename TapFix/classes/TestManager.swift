@@ -27,12 +27,21 @@ class TestManager : ObservableObject {
             testData.ParticipantId = val
         }
     }
+    
     @Published var TypingTestLength: Int = 20
-    @Published var TestLength: Int = 30
-    @Published var WarmupLength: Int = 15 // * 2 (replace, delete)
+    @Published var TestLength: Int = 25
+    @Published var WarmupLength: Int = 10 // * 4 (replace, delete, insert, swap)
     
     @Published var SkipWarmups: Bool = false
     @Published var SkipTypingTest: Bool = false
+    
+    @Published var UseForcedWaitTime: Bool = true
+    @Published var WaitTimesForCorrectionTypes: [TypoCorrectionType: Int] = [
+        .Replace: 3,
+        .Delete: 1, // easiest to grasp
+        .Insert: 3,
+        .Swap: 2
+    ]
     
     @Published var TestOrder: [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)] = []
     
@@ -89,20 +98,6 @@ class TestManager : ObservableObject {
         return testIdentifier
     }
     
-    //func setParticipantId(id: Int)
-    //{
-    //    testData.ParticipantId = id;
-    //    let idstr = String(id)
-    //    if(idstr.starts(with: "9"))
-    //    {
-    //        skipWarmups = true
-    //    }
-    //    if(idstr[1...].starts(with: "9"))
-    //    {
-    //        skipTypingTest = true
-    //    }
-    //}
-    
     func addTypingWarmupResult(result: TypingWarmupResult)
     {
         testData.TypingWarmupResults.append(result);
@@ -132,6 +127,12 @@ class TestManager : ObservableObject {
             (.SpacebarSwipe,        .Replace, false),
             (.TextFieldLongPress,   .Replace, false),
             (.TapFix,               .Replace, false),
+            (.SpacebarSwipe,        .Insert, false),
+            (.TextFieldLongPress,   .Insert, false),
+            (.TapFix,               .Insert, false),
+            (.SpacebarSwipe,        .Swap, false),
+            (.TextFieldLongPress,   .Swap, false),
+            (.TapFix,               .Swap, false),
         ]
         var methodsSeen: [TypoCorrectionMethod : Bool] = [
             .SpacebarSwipe: false,

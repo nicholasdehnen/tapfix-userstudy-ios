@@ -11,64 +11,89 @@ import UIKitTextField
 struct TapFixView: View {
     
     @ObservedObject var vm: TapFixViewModel
-    @State var charProps: [Int: (drag: CGSize, opacity: Double)] = [:]
+    @State var charProps: [Int: (drag: CGSize, opacity: Double, touched: Bool)] = [:]
+    @State var stackSpacing: CGFloat
+    @State var characterWidth: CGFloat
+    
+    init(_ viewModel: TapFixViewModel)
+    {
+        vm = viewModel
+        stackSpacing = CGFloat(min(max(1, (13+8)-viewModel.tapFixCharacters.count), 8))
+        characterWidth = CGFloat(0)
+    }
     
     var body: some View {
         if(vm.tapFixActive)
         {
             VStack {
                 GeometryReader { geometry in
-                    
-                    HStack (spacing: 8) {
+                    HStack (spacing: TapFixTools.calculateSpacing(tapFixCharacterCount: vm.tapFixCharacters.count)) {
                         ForEach(vm.tapFixCharacters, id: \.Id)
                         { c in
                             Text(c.Character)
                                 .font(Font.system(size: 32.0, weight: .bold, design: .monospaced))
                                 .offset(self.charProps[c.Id]?.drag ?? .zero)
                                 .highPriorityGesture(
-                                    DragGesture()
+                                    DragGesture(minimumDistance: 0.0) // minimumDistance: 0.0 -> allow for small movements
                                         .onChanged({ value in
-                                            self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
-                                            let dragDir = detectDirection(value: value)
+                                            let dragDir = TapFixTools.detectDirection(value: value, guardOn: self.charProps[c.Id]?.touched ?? true)
                                             
-                                            // drag up/down -> delete/replace
-                                            if dragDir == .up || dragDir == .down {
+                                            // drag up -> delete
+                                            // allow when method allowed or already been dragged up (eg. mistake -> going down again)
+                                            if vm.methodDeleteAllowed && (dragDir == .up || dragDir == .down && self.charProps[c.Id]!.drag.height > 0.0) {
+                                                self.charProps[c.Id]?.opacity = (value.startLocation.y + value.location.y + 24.0) / 24.0
+                                                self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
+                                            }
+                                            
+                                            // drag down -> replace
+                                            // allow when method allowed or already been dragged down (eg. mistake -> going up again)
+                                            else if vm.methodReplaceAllowed && (dragDir == .down || dragDir == .up && self.charProps[c.Id]!.drag.height < 0.0) {
                                                 self.charProps[c.Id]?.drag = CGSize(width: 0.0, height: value.translation.height)
                                             }
                                             
                                             // drag left/right -> swap
-                                            else if dragDir == .left || dragDir == .right {
+                                            // allow when method allowed and dragging left or right
+                                            else if vm.methodSwapAllowed && (dragDir == .left || dragDir == .right) {
                                                 self.charProps[c.Id]?.drag = CGSize(width: value.translation.width, height: 0.0)
                                             }
                                             
-                                            vm.onCharacterTouched(id: c.Id)
+                                            // report as character touched only if it hasnt been yet
+                                            if(!(self.charProps[c.Id]?.touched ?? false))
+                                            {
+                                                self.charProps[c.Id]?.touched = true
+                                                vm.onCharacterTouchStart(id: c.Id)
+                                            }
                                         })
                                         .onEnded({value in
                                             self.charProps[c.Id]?.opacity = 100.0
                                             self.charProps[c.Id]?.drag = .zero
                                             
-                                            let dragDir = detectDirection(value: value)
+                                            let dragDir = TapFixTools.detectDirection(value: value)
                                             var dragTarget = -1
                                             
-                                            if dragDir == .left || dragDir == .right
+                                            if vm.methodSwapAllowed && (dragDir == .left || dragDir == .right)
                                             {
-                                                dragTarget = calculateTargetIndex(for: c.Id, with: value, dir: dragDir)
+                                                dragTarget = TapFixTools.calculateTargetIndex(for: c.Id, with: value, dir: dragDir, characters: vm.tapFixCharacters, characterWidth: characterWidth, stackSpacing: stackSpacing)
                                             }
                                             
-                                            vm.buttonDrag(direction: detectDirection(value: value), id: c.Id, dragTarget: dragTarget)
+                                            vm.buttonDrag(direction: TapFixTools.detectDirection(value: value), id: c.Id, dragTarget: dragTarget)
                                             
+                                            // un-touch character
+                                            self.charProps[c.Id]?.touched = false
+                                            vm.onCharacterTouchEnd(id: c.Id)
                                         })
                                 )
-                                .frame(minWidth: 10.0, idealWidth: 40.0, maxWidth: 64.0, minHeight: 40.0, idealHeight: 50.0, maxHeight: 50.0, alignment: .center)
+                                .frame(minWidth: 17.0, idealWidth: 40.0, maxWidth: 64.0, minHeight: 40.0, idealHeight: 50.0, maxHeight: 50.0, alignment: .center)
                                 .background {
                                     GeometryReader { geo in
                                         Color.clear
                                             .frame(width: geo.size.width, height: geo.size.height)
                                             .onAppear {
-                                                vm.updateCharacterSize(id: c.Id, size: geo.size)
+                                                characterWidth = geo.size.width
                                             }
                                             .onChange(of: vm.tapFixCharacters.count) {
-                                                vm.updateCharacterSize(id: c.Id, size: geo.size)
+                                                characterWidth = geo.size.width
+                                                stackSpacing = TapFixTools.calculateSpacing(tapFixCharacterCount: vm.tapFixCharacters.count)
                                             }
                                     }
                                     RoundedRectangle(cornerRadius: 5.0, style: RoundedCornerStyle.circular)
@@ -77,12 +102,24 @@ struct TapFixView: View {
                                 }
                                 .opacity(self.charProps[c.Id]?.opacity ?? 100.0)
                                 .onAppear(perform: {
-                                    self.charProps[c.Id] = (.zero, 100.0)
+                                    self.charProps[c.Id] = (.zero, 100.0, false)
                                 })
                         }
                     }
                     .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
                 }
+                .overlay(
+                    HStack {
+                        Spacer()
+                        Button(action: vm.userFlag){
+                            Image(systemName: "questionmark.circle")
+                                .foregroundColor(.yellow)
+                                .font(.system(size: 32))
+                                .padding()
+                        }
+                    },
+                    alignment: .topTrailing // Aligns the overlay to the top trailing corner of the VStack
+                )
                 
                 UIKitTextField(
                     config: .init()
@@ -100,45 +137,11 @@ struct TapFixView: View {
             .padding()
         }
     }
-    
-    func calculateTargetIndex(for id: Int, with gesture: DragGesture.Value, dir: SwipeHVDirection) -> Int {
-        let currentIndex = vm.tapFixCharacters.firstIndex(where: { $0.Id == id }) ?? 0
-        
-        // Calculate the target index based on the translation
-        let charWidth = vm.characterSize.width + 8
-        let distance = Int(gesture.translation.width / charWidth)
-        var targetIndex = currentIndex + distance
-
-        // Adjust the target index based on the current index
-        targetIndex = min(max(0, targetIndex), vm.tapFixCharacters.count)
-
-        return targetIndex
-    }
-    
-    /*
-     SwipeHVDirection / detectDirection from: https://stackoverflow.com/a/61806129
-     */
-    func detectDirection(value: DragGesture.Value) -> SwipeHVDirection {
-        if value.startLocation.y < value.location.y - 24 {
-            return .down
-        }
-        if value.startLocation.y > value.location.y + 24 {
-            return .up
-        }
-        if value.startLocation.x < value.location.x - 24 {
-            return .right
-        }
-        if value.startLocation.x > value.location.x + 24 {
-            return .left
-        }
-        
-        return .none
-    }
 }
 
 struct TapFixView_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = TapFixViewModel("tapfix")
-        TapFixView(vm: viewModel)
+        let viewModel = TapFixViewModel("tapfix") // Interdisciplinary (17 chars)
+        TapFixView(viewModel)
     }
 }

@@ -14,9 +14,16 @@ struct TypoCorrectionTestView: View {
     @StateObject var vm: TypoCorrectionTestViewModel
     
     private let correctionMethodExplanations: [TypoCorrectionMethod : String] = [
-        TypoCorrectionMethod.SpacebarSwipe: "Long press the space bar and move your finger horizontally to position the cursor behind the faulty letter.",
-        TypoCorrectionMethod.TextFieldLongPress: "Long press on the text field and use the magnifying glass to position the cursor behind the faulty letter.",
-        TypoCorrectionMethod.TapFix: "Double tap the faulty word and swipe up to delete a letter, or down to replace it."]
+        TypoCorrectionMethod.SpacebarSwipe: "Long press the space bar and move your finger horizontally to position the cursor.",
+        TypoCorrectionMethod.TextFieldLongPress: "Long press on the text field and use the magnifying glass to position the cursor.",
+        TypoCorrectionMethod.TapFix: "Double-tap a word to activate TapFix."]
+    
+    private let tapFixMethodExplanations: [TypoCorrectionType : String] = [
+        TypoCorrectionType.Delete: "Then, swipe up on a letter to delete it.",
+        TypoCorrectionType.Insert: "Then, type a new letter to insert it and drag-and-drop it to the correct position.",
+        TypoCorrectionType.Replace: "Then, swipe down on a letter and enter a new one to replace it.",
+        TypoCorrectionType.Swap: "Then, swap letters using drag-and-drop."
+    ]
     
     func handleTypoCorrectionComplete(result: TypoCorrectionResult)
     {
@@ -45,6 +52,10 @@ struct TypoCorrectionTestView: View {
                             Text("Correct typos in sentence.")
                         case .Delete:
                             Text("Delete extra characters.")
+                        case .Insert:
+                            Text("Insert missing characters.")
+                        case .Swap:
+                            Text("Correct swapped characters.")
                         }
                     }
                     HStack {
@@ -67,7 +78,8 @@ struct TypoCorrectionTestView: View {
                         TypoCorrectionView(vm: viewModel)
                     }
                     Text("Your task is to correct the mistake in the given sentence using ")+Text("only").underline()+Text(" this method:")
-                    Text(correctionMethodExplanations[vm.correctionMethod]!)
+                    Text(correctionMethodExplanations[vm.correctionMethod]! +
+                         (vm.correctionMethod == TypoCorrectionMethod.TapFix ? " " + tapFixMethodExplanations[vm.correctionType]! : ""))
                         .italic()
                     Text("Do this as fast and accurately as possible.")
                     Text("Time measurement will start the moment you touch the text field. Press the button below to continue.")
@@ -117,7 +129,7 @@ struct TypoCorrectionTestView: View {
 
 struct TypoCorrectionWarmup_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Replace, isWarmup: false)
+        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Insert, isWarmup: false)
         TypoCorrectionTestView(vm: viewModel)
     }
 }

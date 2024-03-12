@@ -16,6 +16,8 @@ enum TypoCorrectionMethod : String, Codable {
 enum TypoCorrectionType : String, Codable {
     case Replace = "Replace"
     case Delete = "Delete"
+    case Insert = "Insert"
+    case Swap = "Swap"
 }
 
 struct TypingWarmupResult : Codable {
@@ -36,6 +38,9 @@ struct TypoCorrectionResult : Codable {
     var TaskCompletionTime: Double;
     var CursorPositioningTime: Double;
     var CharacterDeletionTime: Double;
+    var CharacterInsertionTime: Double;
+    
+    var Flagged: Bool;
 }
 
 struct TestData : Codable {

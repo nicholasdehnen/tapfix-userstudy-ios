@@ -92,7 +92,7 @@ struct TypingWarmupView: View {
                         .padding(.vertical, 2.0)
                     Divider()
                     VStack(alignment: .leading) {
-                        Text("Note: All input is final.\nYou will not be able to correct any mistakes.")
+                        Text("Note: All input is final. You will not be able to correct any mistakes.")
                             .font(.headline)
                     }
                     Divider()

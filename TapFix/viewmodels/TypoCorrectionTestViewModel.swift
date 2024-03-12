@@ -13,7 +13,7 @@ class TypoCorrectionTestViewModel: ObservableObject {
     @Published var correctionType: TypoCorrectionType
     @Published var isWarmup: Bool
     @Published var correctionCount: Int
-    @Published var sentences: [TypoSentence] = []
+    @Published var sentences: [TypoSentenceProtocol] = []
     @Published var currentSentence: Int = 0
     
     private let typoGenerator: TypoGenerator

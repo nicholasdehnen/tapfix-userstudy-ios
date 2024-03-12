@@ -9,6 +9,7 @@ import SwiftUI
 import UIKitTextField
 
 
+// Inverted Boolean Binding
 prefix func ! (value: Binding<Bool>) -> Binding<Bool> {
     Binding<Bool>(
         get: { !value.wrappedValue },
@@ -16,22 +17,47 @@ prefix func ! (value: Binding<Bool>) -> Binding<Bool> {
     )
 }
 
+// TextField with padding
 class PaddedTextField: BaseUITextField {
-  var padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8) {
-    didSet {
-      setNeedsLayout()
+    var padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8) {
+        didSet {
+            setNeedsLayout()
+        }
     }
-  }
-  
-  public override func textRect(forBounds bounds: CGRect) -> CGRect {
-    super.textRect(forBounds: bounds).inset(by: padding)
-  }
-  
-  public override func editingRect(forBounds bounds: CGRect) -> CGRect {
-    super.editingRect(forBounds: bounds).inset(by: padding)
-  }
+    
+    public override func textRect(forBounds bounds: CGRect) -> CGRect {
+        super.textRect(forBounds: bounds).inset(by: padding)
+    }
+    
+    public override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        super.editingRect(forBounds: bounds).inset(by: padding)
+    }
+    
+    // return range of selection
+    public var selectedSwiftTextRange: ClosedRange<Int>? {
+        if let selectedRange = super.selectedTextRange {
+            let start = offset(from: beginningOfDocument, to: selectedRange.start)
+            let end = offset(from: beginningOfDocument, to: selectedRange.end)
+            return start ... end
+        }
+        else {
+            return nil
+        }
+    }
 }
 
+// UITextInput range as NSRange
+// from: https://stackoverflow.com/a/38805072
+extension UITextInput {
+    var selectedRange: NSRange? {
+        guard let range = selectedTextRange else { return nil }
+        let location = offset(from: beginningOfDocument, to: range.start)
+        let length = offset(from: range.start, to: range.end)
+        return NSRange(location: location, length: length)
+    }
+}
+
+// Wrapper for UITextView with dynamic height
 struct TextView: UIViewRepresentable {
     
     @Binding var text: String?
@@ -56,5 +82,15 @@ struct TextView: UIViewRepresentable {
         DispatchQueue.main.async {
             self.desiredHeight = newSize.height
         }
+    }
+}
+
+// Swaps two indices without mutating the array
+extension Array {
+    func swapping(_ index1: Int, with index2: Int) -> Array {
+        var newArray = self
+        guard index1 < count, index2 < count, index1 != index2 else { return newArray }
+        newArray.swapAt(index1, index2)
+        return newArray
     }
 }

@@ -24,6 +24,9 @@
 		013803562945116900487F5A /* phrases2.txt in Resources */ = {isa = PBXBuildFile; fileRef = 013803552945116900487F5A /* phrases2.txt */; };
 		0138035B2945169400487F5A /* TestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0138035A2945169400487F5A /* TestManager.swift */; };
 		0138035E2945179700487F5A /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0138035D2945179700487F5A /* TestData.swift */; };
+		014576142B97806E00D73DEA /* TapFixTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 014576132B97806E00D73DEA /* TapFixTools.swift */; };
+		015A9A9B2B9BAA3800AB6F32 /* Willow in Frameworks */ = {isa = PBXBuildFile; productRef = 015A9A9A2B9BAA3800AB6F32 /* Willow */; };
+		015A9A9D2B9BC02800AB6F32 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A9A9C2B9BC02800AB6F32 /* Logging.swift */; };
 		016183F52B54627600D7A1CB /* StudySetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 016183F42B54627600D7A1CB /* StudySetupView.swift */; };
 		016183F72B5486E000D7A1CB /* NumberWheelPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 016183F62B5486E000D7A1CB /* NumberWheelPickerView.swift */; };
 		017C1ED82945988F00D6A417 /* TypoGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1ED72945988F00D6A417 /* TypoGenerator.swift */; };
@@ -56,6 +59,8 @@
 		0138035A2945169400487F5A /* TestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestManager.swift; sourceTree = "<group>"; };
 		0138035D2945179700487F5A /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		0138035F29451EDE00487F5A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		014576132B97806E00D73DEA /* TapFixTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapFixTools.swift; sourceTree = "<group>"; };
+		015A9A9C2B9BC02800AB6F32 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		016183F42B54627600D7A1CB /* StudySetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudySetupView.swift; sourceTree = "<group>"; };
 		016183F62B5486E000D7A1CB /* NumberWheelPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberWheelPickerView.swift; sourceTree = "<group>"; };
 		017C1ED72945988F00D6A417 /* TypoGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoGenerator.swift; sourceTree = "<group>"; };
@@ -73,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				015A9A9B2B9BAA3800AB6F32 /* Willow in Frameworks */,
 				01E3AA8029467DBC00EEDBBB /* UIKitTextField in Frameworks */,
 				011CB1DF2948FD5200E6C88C /* Alamofire in Frameworks */,
 			);
@@ -155,6 +161,8 @@
 				017C1ED72945988F00D6A417 /* TypoGenerator.swift */,
 				017C1EDB2945A4EC00D6A417 /* StringExtension.swift */,
 				01E3AA8129467EB500EEDBBB /* SwiftExtensions.swift */,
+				014576132B97806E00D73DEA /* TapFixTools.swift */,
+				015A9A9C2B9BC02800AB6F32 /* Logging.swift */,
 			);
 			path = classes;
 			sourceTree = "<group>";
@@ -198,6 +206,7 @@
 			packageProductDependencies = (
 				01E3AA7F29467DBC00EEDBBB /* UIKitTextField */,
 				011CB1DE2948FD5200E6C88C /* Alamofire */,
+				015A9A9A2B9BAA3800AB6F32 /* Willow */,
 			);
 			productName = TapFix;
 			productReference = 0138033F2944F87C00487F5A /* TapFix.app */;
@@ -230,6 +239,7 @@
 			packageReferences = (
 				01E3AA7E29467DBC00EEDBBB /* XCRemoteSwiftPackageReference "uikit-textfield" */,
 				011CB1DD2948FD5200E6C88C /* XCRemoteSwiftPackageReference "Alamofire" */,
+				015A9A992B9BAA3800AB6F32 /* XCRemoteSwiftPackageReference "Willow" */,
 			);
 			productRefGroup = 013803402944F87C00487F5A /* Products */;
 			projectDirPath = "";
@@ -263,6 +273,7 @@
 				01E4AF032947C42E0068FC33 /* TapFixViewModel.swift in Sources */,
 				0127E244294539CC001E0023 /* TypoCorrectionTestView.swift in Sources */,
 				01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */,
+				015A9A9D2B9BC02800AB6F32 /* Logging.swift in Sources */,
 				0127E23A29452554001E0023 /* MainView.swift in Sources */,
 				013803452944F87C00487F5A /* TypingWarmupView.swift in Sources */,
 				013803432944F87C00487F5A /* TapFixApp.swift in Sources */,
@@ -279,6 +290,7 @@
 				0127E24229452E24001E0023 /* ErrorView.swift in Sources */,
 				017C1ED82945988F00D6A417 /* TypoGenerator.swift in Sources */,
 				017C1EDC2945A4EC00D6A417 /* StringExtension.swift in Sources */,
+				014576142B97806E00D73DEA /* TapFixTools.swift in Sources */,
 				016183F52B54627600D7A1CB /* StudySetupView.swift in Sources */,
 				0138035B2945169400487F5A /* TestManager.swift in Sources */,
 			);
@@ -503,6 +515,14 @@
 				minimumVersion = 5.6.1;
 			};
 		};
+		015A9A992B9BAA3800AB6F32 /* XCRemoteSwiftPackageReference "Willow" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Nike-Inc/Willow";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.1.0;
+			};
+		};
 		01E3AA7E29467DBC00EEDBBB /* XCRemoteSwiftPackageReference "uikit-textfield" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/vinceplusplus/uikit-textfield.git";
@@ -518,6 +538,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 011CB1DD2948FD5200E6C88C /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		015A9A9A2B9BAA3800AB6F32 /* Willow */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 015A9A992B9BAA3800AB6F32 /* XCRemoteSwiftPackageReference "Willow" */;
+			productName = Willow;
 		};
 		01E3AA7F29467DBC00EEDBBB /* UIKitTextField */ = {
 			isa = XCSwiftPackageProductDependency;

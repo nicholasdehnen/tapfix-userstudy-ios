@@ -8,6 +8,7 @@
 import SwiftUI
 import Foundation
 import UIKitTextField
+import Willow
 
 /*
  SwipeHVDirection / detectDirection from: https://stackoverflow.com/a/61806129
@@ -30,22 +31,31 @@ struct TapFixCharacter
 
 class TapFixViewModel : ObservableObject
 {
-    @Published var tapFixCharacters: [TapFixCharacter] = [TapFixCharacter("t", 0), TapFixCharacter("a", 1), TapFixCharacter("p", 2),
-                                                          TapFixCharacter("f", 3), TapFixCharacter("i", 4), TapFixCharacter("x", 5)]
+    @Published private(set) var tapFixCharacters: [TapFixCharacter] = [TapFixCharacter("t", 0), TapFixCharacter("a", 1), TapFixCharacter("p", 2),
+                                                                       TapFixCharacter("f", 3), TapFixCharacter("i", 4), TapFixCharacter("x", 5)]
     @Published var tapFixActive: Bool
     @Published var textInput: String
     @Published var textInputFocused: Bool
-    
     @Published var activeReplaceId: Int
     
-    var onChangeHandler: (_ oldText: String, _ newText: String) -> Bool;
+    // allowed methods
+    @Published var methodDeleteAllowed: Bool = false
+    @Published var methodReplaceAllowed: Bool = false
+    @Published var methodSwapAllowed: Bool = false
+    @Published var methodInsertAllowed: Bool = false
+    
+    var onChangeHandler: (_ oldText: String, _ newText: String) -> Bool
     var onTouchedHandler: (_ character: String, _ position: Int) -> Void
+    var onUserFlagHandler: () -> Void
     var storedText: String
-    var characterSize: CGSize
+    
+    private let logger = buildWillowLogger(name: "TapFixVM")
     
     internal init(_ word: String = "tapfix",
                   _ onChangeCallback: @escaping (_ oldText: String, _ newText: String) -> Bool = {oldText,newText in return true},
-                  _ onTouchedCallback: @escaping (_ character: String, _ position: Int) -> Void = {character,position in /*..*/}) {
+                  _ onTouchedCallback: @escaping (_ character: String, _ position: Int) -> Void = {character,position in /*..*/},
+                  _ onUserFlagCallback: @escaping () -> Void = {},
+                  _ methodsAllowed : [TypoCorrectionType] = [.Delete, .Replace, .Swap, .Insert]) {
         self.tapFixActive = true
         self.textInput = ""
         self.textInputFocused = true // used to be: false, now always focussed.
@@ -53,12 +63,83 @@ class TapFixViewModel : ObservableObject
         self.storedText = word
         self.onChangeHandler = onChangeCallback
         self.onTouchedHandler = onTouchedCallback
-        self.characterSize = CGSize()
+        self.onUserFlagHandler = onUserFlagCallback
         self.tapFixCharacters = generateTapFixCharacters(word: word)
+        for method in methodsAllowed
+        {
+            switch method
+            {
+            case .Delete:
+                self.methodDeleteAllowed = true
+            case .Replace:
+                self.methodReplaceAllowed = true
+            case .Swap:
+                self.methodSwapAllowed = true
+            case .Insert:
+                self.methodInsertAllowed = true
+                self.methodSwapAllowed = true
+            }
+        }
+    }
+    
+    // Convenience function to update characters from String, wraps self.updateCharacters([TapFixCharacter])
+    public func updateCharacters(_ newWord: String)
+    {
+        let tapFixChars = generateTapFixCharacters(word: newWord)
+        self.updateCharacters(tapFixChars)
+    }
+    
+    // Convenience function to swap TapFixCharacters, wraps self.updateCharacters([TapFixCharacter])
+    public func swapCharacters(_ indexFrom: Int, _ indexTo: Int)
+    {
+        let tapFixChars = tapFixCharacters.swapping(indexFrom, with: indexTo)
+        self.updateCharacters(tapFixChars)
+    }
+    
+    // Convenience function to move TapFixCharacter, wraps self.updateCharacters([TapFixCharacter])
+    public func moveCharacter(_ indexFrom: Int, _ indexTo: Int) {
+        // Ensure indexFrom and indexTo are within the array bounds
+        guard indexFrom < tapFixCharacters.count && indexTo <= tapFixCharacters.count else
+        {
+            logger.warnMessage("\(#function): Rejecting out of bounds move, indexFrom=\(indexFrom), indexTo=\(indexTo), count=\(self.tapFixCharacters.count)")
+            return
+        }
+        
+        var tapFixChars = tapFixCharacters
+        let char = tapFixChars.remove(at: indexFrom)
+        // no adjustment to indexTo needed when indexFrom < indexTo since we want to shift the remaining characters to the left
+        tapFixChars.insert(char, at: indexTo)
+        
+        self.updateCharacters(tapFixChars)
+    }
+    
+    // Updates TapFix character array and publishes changes
+    // Only method that should be used to update TapFix characters
+    public func updateCharacters(_ newCharacters: [TapFixCharacter])
+    {
+        self.storedText = getTapFixCharactersAsString(self.tapFixCharacters)
+        let newText = getTapFixCharactersAsString(newCharacters)
+        
+        logger.debugMessage("\(#function): oldText: \(self.storedText) -> newText: \(newText)")
+        if(self.storedText == newText)
+        {
+            logger.debugMessage("\(#function): No change, ignoring.")
+        }
+        else if(self.onChangeHandler(self.storedText, newText))
+        {
+            logger.debugMessage("\(#function): Accepted by change handler, updating.")
+            self.storedText = newText
+            self.tapFixCharacters = newCharacters
+        }
+        else
+        {
+            logger.debugMessage("\(#function): Rejected by change handler!")
+        }
     }
     
     private func generateTapFixCharacters(word: String) -> [TapFixCharacter]
     {
+        logger.debugMessage("\(#function): word = \(word)")
         var chars: [TapFixCharacter] = []
         for i in 0..<word.count
         {
@@ -77,80 +158,66 @@ class TapFixViewModel : ObservableObject
         return stringRep
     }
     
-    private func swapTapFixCharacters(id0: Int, id1: Int) -> Bool
+    func getCharacterInfoForId(id: Int) -> (String, Int)
     {
-        var i0 = -1
-        var i1 = -1
-        
-        for i in 0..<self.tapFixCharacters.count {
-            if self.tapFixCharacters[i].Id == id0 {
-                i0 = i
-            }
-            else if self.tapFixCharacters[i].Id == id1 {
-                i1 = i
-            }
-        }
-        
-        if i0 == -1 || i1 == -1 {
-            return false
-        }
-        
-        var tmp_id = self.tapFixCharacters[i0].Id
-        self.tapFixCharacters[i0].Id = self.tapFixCharacters[i1].Id
-        self.tapFixCharacters[i1].Id = tmp_id
-        
-        self.tapFixCharacters.swapAt(i0, i1)
-        return true
-    }
-    
-    func onCharacterTouched(id: Int)
-    {
-        var offset = -1
+        var index = -1
         var character = "?"
         for i in 0..<tapFixCharacters.count
         {
             if tapFixCharacters[i].Id == id
             {
-                offset = i
+                index = i
                 character = tapFixCharacters[i].Character
                 break
             }
         }
-        
-        self.onTouchedHandler(character, offset)
+        return (character, index)
     }
     
-    func updateCharacterSize(id: Int, size: CGSize) {
-        self.characterSize = size
+    func onCharacterTouchStart(id: Int)
+    {
+        let (character, index) = getCharacterInfoForId(id: id)
+        logger.debugMessage("\(#function): Character \(character) with id \(id) at index \(index)")
+        self.onTouchedHandler(character, index)
+    }
+    
+    func onCharacterTouchEnd(id: Int)
+    {
+        let (character, index) = getCharacterInfoForId(id: id)
+        logger.debugMessage("\(#function): Character \(character) with id \(id) at index \(index)")
     }
     
     func buttonDrag(direction: SwipeHVDirection, id: Int, dragTarget: Int = -1)
     {
-        if(direction == .up)
+        logger.debugMessage("\(#function): direction = \(direction), id = \(id), dragTarget = \(dragTarget)")
+        if(self.methodDeleteAllowed && direction == .up)
         {
             self.storedText = getTapFixCharactersAsString(self.tapFixCharacters)
             let newCharacters = self.tapFixCharacters.filter { $0.Id != id }
-            let newText = getTapFixCharactersAsString(newCharacters)
-            if newText != self.storedText && onChangeHandler(self.storedText, newText)
-            {
-                self.tapFixCharacters = newCharacters
-            }
+            self.updateCharacters(newCharacters)
         }
         
-        if(direction == .down)
+        if(self.methodReplaceAllowed && direction == .down)
         {
             //self.textInputFocused = true
             self.activeReplaceId = id
         }
         
-        if(dragTarget != -1) {
+        if(self.methodSwapAllowed && dragTarget != -1) {
             
             let charIndex = Int(self.tapFixCharacters.firstIndex(where: { $0.Id == id }) ?? 0)
             
-            let el = self.tapFixCharacters.remove(at: charIndex)
-            self.tapFixCharacters.insert(el, at: dragTarget)
-        
+            // make sure dragTarget is legal (within self.tapFixCharacters length)
+            var finalDragTarget = dragTarget
+            let dragTargetVal = min(max(dragTarget, 0), self.tapFixCharacters.count - 1)
+            if(dragTarget != dragTargetVal)
+            {
+                logger.warnMessage("\(#function): illegal dragTarget \(dragTarget) (out of bounds), setting to \(dragTargetVal)!")
+                finalDragTarget = dragTargetVal
+            }
             
+            // move from charIndex to dragTarget
+            self.moveCharacter(charIndex, finalDragTarget)
             self.storedText = getTapFixCharactersAsString(self.tapFixCharacters)
         }
     }
@@ -159,6 +226,15 @@ class TapFixViewModel : ObservableObject
     {
         //textInput is now always focussed to allow for input. TODO: See if constant textInput focus has bad consequences.
         //self.textInputFocused = false
+        logger.debugMessage("\(#function): range = \(range), replacement = \(replacement))")
+        
+        // check if method allowed
+        if(!(self.methodInsertAllowed || (self.methodReplaceAllowed && activeReplaceId != -1)))
+        {
+            logger.debugMessage("\(#function): not allowed to replace or insert, rejecting.")
+            return false
+        }
+        
         if(activeReplaceId != -1)
         {
             for i in 0..<tapFixCharacters.count
@@ -167,27 +243,28 @@ class TapFixViewModel : ObservableObject
                 {
                     var changedCharacters = self.tapFixCharacters
                     changedCharacters[i].Character = replacement.first!.lowercased()
-                
-                    let newText = getTapFixCharactersAsString(changedCharacters)
-                    let oldText = getTapFixCharactersAsString(self.tapFixCharacters)
-                    if oldText != newText && onChangeHandler(oldText, newText)
-                    {
-                        self.tapFixCharacters = changedCharacters
-                    }
+                    logger.debugMessage("\(#function): replacing character at index \(i) (= \(changedCharacters[i].Character)) with \(replacement)")
+                    self.updateCharacters(changedCharacters)
                 }
             }
             activeReplaceId = -1
         }
         else
         {
-            // TODO: Smarter insert, use ML model here?
-            let chars = getTapFixCharactersAsString(self.tapFixCharacters) + replacement
-            if onChangeHandler(self.storedText, chars)
-            {
-                self.tapFixCharacters = generateTapFixCharacters(word: chars)
-            }
+            let chars = getTapFixCharactersAsString(self.tapFixCharacters)
+            // insert replacement in the middle
+            let midpoint = Int(round(Double(chars.count) / 2))
+            let newChars = String(chars.prefix(midpoint)) + replacement + String(chars.suffix(chars.count - midpoint))
+            logger.debugMessage("\(#function): inserting \(replacement) at midpoint \(midpoint), \(chars) -> \(newChars)")
+            self.updateCharacters(newChars)
         }
-        return false
+        
+        return false // always return false, we never actually want anything in the textfield, changes happen in tapfix characters
     }
-
+    
+    func userFlag()
+    {
+        logger.debugMessage("\(#function): User flagged this test.")
+        self.onUserFlagHandler()
+    }
 }

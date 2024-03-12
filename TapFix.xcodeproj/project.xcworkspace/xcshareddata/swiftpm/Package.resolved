@@ -1,4 +1,5 @@
 {
+  "originHash" : "b2f087e814428d78713063942d7d82a836ef74ac3a3fd3890b2558046ffe992f",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -17,7 +18,16 @@
         "revision" : "5e940a0e08f3e44922266d4bf4f0c0a31ebf7eaf",
         "version" : "2.0.1"
       }
+    },
+    {
+      "identity" : "willow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Nike-Inc/Willow",
+      "state" : {
+        "revision" : "25fa213596658d0e47ac1a4e598daaf9ca7e479a",
+        "version" : "6.1.0"
+      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

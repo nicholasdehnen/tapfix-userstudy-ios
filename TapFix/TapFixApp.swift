@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct TapFixApp: App {
+    init()
+    {
+        // do init
+    }
     var body: some Scene {
         WindowGroup {
             MainView()
