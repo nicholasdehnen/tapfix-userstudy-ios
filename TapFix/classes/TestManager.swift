@@ -7,16 +7,22 @@
 
 import Foundation
 import GameplayKit
+import CodableCSV
+
 
 //@MainActor
 class TestManager : ObservableObject {
     
     var documentsDirectory: URL;
     var testDataFile: URL;
+    var testDataCsvFile: URL;
     var testIdentifier: String;
     var testData: TestData;
     var testDataFileSet: Bool = false;
     let jsonEncoder: JSONEncoder;
+    let csvEncoder: CSVEncoder;
+    
+    private let logger = buildWillowLogger(name: "TestManager")
     
     var ParticipantId: Int {
         get {
@@ -25,6 +31,7 @@ class TestManager : ObservableObject {
         set(val) {
             objectWillChange.send()
             testData.ParticipantId = val
+            logger.infoMessage("Participant ID set to \(val)")
         }
     }
     
@@ -49,13 +56,16 @@ class TestManager : ObservableObject {
     static let shared = TestManager()
     private init()
     {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask);
-        documentsDirectory = paths[0];
-        testDataFile = documentsDirectory.appendingPathComponent("not-set.txt");
-        testData = TestData();
-        jsonEncoder = JSONEncoder();
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        documentsDirectory = paths[0]
+        testDataFile = documentsDirectory.appendingPathComponent("not-set.txt")
+        testDataCsvFile = documentsDirectory.appendingPathComponent("not-set.csv")
+        testData = TestData()
+        jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .prettyPrinted
+        csvEncoder = CSVEncoder()
         testIdentifier = "not-set"
+        logger.debugMessage("Initialized, documentsDirectory: \(self.documentsDirectory)")
     }
     
     private func _updateResultsFile()
@@ -70,15 +80,26 @@ class TestManager : ObservableObject {
             // create file name from participant id + date
             testIdentifier = "p\(testData.ParticipantId)_d\(formattedDate)"
             testDataFile = documentsDirectory.appendingPathComponent("\(testIdentifier).json");
+            testDataCsvFile = documentsDirectory.appendingPathComponent("\(testIdentifier).csv");
             
             testDataFileSet = true;
+            logger.debugMessage("Test data file was not yet set, set to: \(self.testDataFile)")
         }
         
+        // json
         do {
             let testDataJson = try jsonEncoder.encode(testData)
             try testDataJson.write(to: testDataFile)
         } catch let error {
-            debugPrint(error.localizedDescription);
+            logger.errorMessage("Error writing test data json file: \(error.localizedDescription)")
+        }
+        
+        // csv (experimental)
+        do {
+            let testDataCsv = try csvEncoder.encode([testData])
+            try testDataCsv.write(to: testDataCsvFile)
+        } catch let error {
+            logger.errorMessage("Error writing test data csv file: \(error.localizedDescription)")
         }
     }
     
@@ -89,6 +110,7 @@ class TestManager : ObservableObject {
             return testDataJson
         } catch let error {
             debugPrint(error.localizedDescription);
+            logger.errorMessage("Error encoding test data to json: \(error.localizedDescription)")
             return Data("{\"error\": \"\(error.localizedDescription)\"}".utf8)
         }
     }
@@ -102,12 +124,14 @@ class TestManager : ObservableObject {
     {
         testData.TypingWarmupResults.append(result);
         _updateResultsFile();
+        logger.debugMessage("Added TypingWarmupResult to testData and updated results file.")
     }
     
     func addTypoCorrectionResult(result: TypoCorrectionResult)
     {
         testData.CorrectionResults.append(result);
         _updateResultsFile();
+        logger.debugMessage("Added TypoCorrectionResult to testData and updated results file.")
     }
 
     @discardableResult

@@ -20,13 +20,14 @@ struct MainView: View {
     #if DEBUG
     let isDebug = true
     private func generateAndDisplayNewTypo() {
+        let correctionMethod = TypoCorrectionMethod.SpacebarSwipe
         let correctionType = TypoCorrectionType.Swap
         let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
         //InsertTypoSentence(prefix: "well", typo: "connectd", correction: "connected", suffix: "with people", full: "well connectd with people", fullCorrect: "well connected with people", typoWordIndex: [7], typoSentenceIndex: [5+7], characterToInsert: "e")
         
-        let newViewModel = TypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: correctionType) { [self] _ in
-            self.generateAndDisplayNewTypo() // call self on complete to generate new vm and view
+        let newViewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType) { [self] _ in
+                self.generateAndDisplayNewTypo() // call self on complete to generate new vm and view
         }
         
         updateCorrectionVmWithTransition(with: newViewModel)

@@ -7,7 +7,7 @@
 
 import Foundation
 
-// Taken from https://stackoverflow.com/a/38215613
+// Taken partially from https://stackoverflow.com/a/38215613
 extension StringProtocol {
     subscript(_ offset: Int)                     -> Element     { self[index(startIndex, offsetBy: offset)] }
     subscript(_ range: Range<Int>)               -> SubSequence { prefix(range.lowerBound+range.count).suffix(range.count) }
@@ -15,5 +15,15 @@ extension StringProtocol {
     subscript(_ range: PartialRangeThrough<Int>) -> SubSequence { prefix(range.upperBound.advanced(by: 1)) }
     subscript(_ range: PartialRangeUpTo<Int>)    -> SubSequence { prefix(range.upperBound) }
     subscript(_ range: PartialRangeFrom<Int>)    -> SubSequence { suffix(Swift.max(0, count-range.lowerBound)) }
+    
+    func indices(of character: Character) -> [Int] {
+        var indices = [Int]()
+        for (index, eachCharacter) in self.enumerated() {
+            if eachCharacter == character {
+                indices.append(index)
+            }
+        }
+        return indices
+    }
 }
 

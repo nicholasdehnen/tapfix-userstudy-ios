@@ -62,4 +62,17 @@ class TapFixTools
         return .none
     }
     
+    static func buildTypoCorrectionViewModel(id: Int, typoSentence: TypoSentenceProtocol, correctionMethod: TypoCorrectionMethod, correctionType: TypoCorrectionType,
+                                             completionHandler: @escaping (TypoCorrectionResult) -> Void, preview: Bool = false) -> TypoCorrectionViewModel
+    {
+        switch correctionMethod {
+        case .TapFix:
+            return TapFixTypoCorrectionViewModel(id: id, typoSentence: typoSentence, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
+        case .SpacebarSwipe, .TextFieldLongPress:
+            return BaselineTypoCorrectionViewModel(id: id, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
+        default:
+            return TypoCorrectionViewModel(id: id, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
+        }
+    }
+    
 }

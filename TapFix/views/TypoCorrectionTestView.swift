@@ -74,7 +74,7 @@ struct TypoCorrectionTestView: View {
                     Text("In the following screens, you'll be shown correction tasks of the following layout:")
                     VStack(alignment: .center) {
                         let example = vm.sentences.last!
-                        let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: example, correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in }, preview: true)
+                        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: example, correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in }, preview: true)
                         TypoCorrectionView(vm: viewModel)
                     }
                     Text("Your task is to correct the mistake in the given sentence using ")+Text("only").underline()+Text(" this method:")
@@ -100,7 +100,7 @@ struct TypoCorrectionTestView: View {
                         }
                         .padding(.horizontal)
                         .padding(.top)
-                        let viewModel = TypoCorrectionViewModel(id: i, typoSentence: vm.sentences[i], correctionMethod: vm.correctionMethod, correctionType: vm.correctionType, completionHandler: handleTypoCorrectionComplete)
+                        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: i, typoSentence: vm.sentences[i], correctionMethod: vm.correctionMethod, correctionType: vm.correctionType, completionHandler: handleTypoCorrectionComplete)
                         TypoCorrectionView(vm: viewModel)
                             .navigationBarBackButtonHidden(true)
                     }

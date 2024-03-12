@@ -62,7 +62,7 @@ struct TypoCorrectionView: View {
                     .shouldChangeCharacters(handler: vm.shouldChangeCharacters)
                     .onBeganEditing(handler: vm.onBeganEditing)
             )
-            .disabled(vm.preview || vm.tapFixVisible ||
+            .disabled(vm.preview || vm.methodActive ||
                       (vm.correctionMethod == .TapFix && vm.finishedEditing.timeIntervalSinceReferenceDate != 0))
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
@@ -137,6 +137,13 @@ struct TypoCorrectionView: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                             .animation(.easeInOut, value: vm.showNotificationToast)
                     }
+                    .onAppear {
+                        // Hide the toast after a <duration> seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + vm.notificationToastDuration) {
+                            vm.showNotificationToast = false
+                            vm.notificationToastMessage = "No message."
+                        }
+                    }
                 }
                 else {
                     EmptyView()
@@ -147,7 +154,8 @@ struct TypoCorrectionView: View {
     }
     
     @ViewBuilder private var tapFixOverlay : some View {
-        if vm.tapFixVisible {
+        if let vm = vm as? TapFixTypoCorrectionViewModel, vm.methodActive
+        {
             let tapFixVm = TapFixViewModel(vm.tapFixWord, vm.onTapFixChange, vm.onTapFixCharacterTouched, vm.onTapFixUserFlag, [vm.correctionType])
             GeometryReader { geometry in
                 TapFixView(tapFixVm)
@@ -156,8 +164,8 @@ struct TypoCorrectionView: View {
                             .fill(UITraitCollection.current.userInterfaceStyle == .dark ? Color.black :  Color.white)
                             .opacity(0.95)
                             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center))
-                    .animation(.easeIn, value: vm.tapFixVisible == true)
-                    .animation(.easeOut, value: vm.tapFixVisible == false)
+                    .animation(.easeIn, value: vm.methodActive == true)
+                    .animation(.easeOut, value: vm.methodActive == false)
                     .ignoresSafeArea(.keyboard, edges: .bottom)
             }
         }
@@ -179,7 +187,7 @@ struct TypoCorrectionView_Previews: PreviewProvider {
         let correctionType = TypoCorrectionType.Insert;
         let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
-        let viewModel = TypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: correctionType, completionHandler: {_ in })
+        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: correctionType, completionHandler: {_ in })
         TypoCorrectionView(vm: viewModel)
     }
 }
