@@ -23,6 +23,19 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
         super.init(id: id, typoSentence: typoSentence, correctionMethod: .TapFix, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
     }
     
+    override func calculateStats() -> (taskCompletionTime: Double, insertionTime: Double, positioningTime: Double, correctionTime: Double) {
+        var superStats = super.calculateStats()
+        
+        // TapFix special case: if Insert, positioningTime is counted from Insertion on
+        // -> This is because order is inverted, character is first inserted, then moved to the correct place
+        if self.typoSentence is InsertTypoSentence {
+            superStats.positioningTime = finishedInserting.distance(to: finishedSelecting)
+            superStats.correctionTime = finishedSelecting.distance(to: finishedEditing) // cascades to correctionTime
+        }
+        
+        return superStats
+    }
+    
     override func shouldChangeCharacters(textField: PaddedTextField, range: NSRange, replacementString: String) -> Bool
     {
         logger.debugMessage("\(#function): range = \(range), replacementString = \(replacementString)")

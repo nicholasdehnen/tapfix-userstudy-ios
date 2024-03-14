@@ -83,29 +83,31 @@ class TypoCorrectionViewModel : ObservableObject
         self.logger = buildWillowLogger(name: "\(className)-\(id)")
     }
     
-    
-    func calculateStatsAndFinish()
+    func calculateStats() -> (taskCompletionTime: Double, insertionTime: Double, positioningTime: Double, correctionTime: Double)
     {
-        let tct = beganEditing.distance(to: finishedEditing)
-        let idp = beganEditing.distance(to: finishedInserting)
-        var stp = beganEditing.distance(to: finishedSelecting)
-        let cdp = finishedSelecting.distance(to: finishedCorrecting)
-
-        // insert special case: selection is after inserting
-        if self.typoSentence is InsertTypoSentence {
-            stp = finishedInserting.distance(to: finishedSelecting)
-        }
+        let taskCompletionTime = beganEditing.distance(to: finishedEditing)
+        let insertionTime = beganEditing.distance(to: finishedInserting)
+        let positioningTime = beganEditing.distance(to: finishedSelecting)
+        let correctionTime = finishedSelecting.distance(to: finishedCorrecting)
+        
+        return (taskCompletionTime: taskCompletionTime, insertionTime: insertionTime,
+                positioningTime: positioningTime, correctionTime: correctionTime)
+    }
+    
+    func completeTask()
+    {
+        let stats = self.calculateStats()
         
         let result = TypoCorrectionResult(Id: self.taskId, CorrectionMethod: self.correctionMethod, CorrectionType: self.correctionType, FaultySentence: self.typoSentence.full, UserCorrectedSentence: self.typoSentence.fullCorrect,
-                                          TaskCompletionTime: tct, CursorPositioningTime: stp, CharacterDeletionTime: cdp, CharacterInsertionTime: idp, Flagged: self.testFlagged)
+                                          TaskCompletionTime: stats.taskCompletionTime, CursorPositioningTime: stats.positioningTime, CharacterDeletionTime: stats.correctionTime, CharacterInsertionTime: stats.insertionTime, Flagged: self.testFlagged)
         self.completionHandler(result);
         
         let flagString = self.testFlagged ? "⚑ " : ""
-        var statsInfoMessage = flagString + String(format: "Task statistics: taskCompletionTime = %.3fs, selectionTime = %.3fs, correctionTime = %.3fs", tct, stp, cdp)
+        var statsInfoMessage = flagString + String(format: "Task statistics: taskCompletionTime = %.3fs, positioningTime = %.3fs, correctionTime = %.3fs", stats.taskCompletionTime, stats.positioningTime, stats.correctionTime)
         
         // insert special case
         if self.typoSentence is InsertTypoSentence {
-            statsInfoMessage.append(String(format: ", insertTime = %.3fs", idp))
+            statsInfoMessage.append(String(format: ", insertionTime = %.3fs", stats.insertionTime))
         }
         
         logger.infoMessage(statsInfoMessage)
@@ -118,7 +120,7 @@ class TypoCorrectionViewModel : ObservableObject
         if(key == UIReturnKeyType.next) {
             if(userText.compare(typoSentence.fullCorrect, options: .caseInsensitive) == .orderedSame)
             {
-                self.calculateStatsAndFinish()
+                self.completeTask()
                 return true;
             }
         }

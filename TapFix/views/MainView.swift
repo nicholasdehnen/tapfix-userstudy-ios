@@ -19,9 +19,12 @@ struct MainView: View {
     
     #if DEBUG
     let isDebug = true
+    let types: [TypoCorrectionType] = [.Insert, .Replace, .Delete, .Swap]
+    @State var methodCounter = 0
     private func generateAndDisplayNewTypo() {
-        let correctionMethod = TypoCorrectionMethod.SpacebarSwipe
-        let correctionType = TypoCorrectionType.Swap
+        let correctionMethod = TypoCorrectionMethod.TextFieldLongPress
+        let correctionType = types[methodCounter % types.count]
+        methodCounter += 1
         let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
         //InsertTypoSentence(prefix: "well", typo: "connectd", correction: "connected", suffix: "with people", full: "well connectd with people", fullCorrect: "well connected with people", typoWordIndex: [7], typoSentenceIndex: [5+7], characterToInsert: "e")

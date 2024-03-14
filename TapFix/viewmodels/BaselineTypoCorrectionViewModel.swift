@@ -43,21 +43,27 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
                 finishedEditing = Date.now
             }
             logger.debugMessage("\(#function): true")
-            return true;
+            return true // return true - delete is ok
         }
         else
         {
+            guard replacementString.first != nil else {
+                logger.errorMessage("Wanted to insert character at position \(range.location), but nothing to insert!")
+                flag(reason: "User tried to insert nil character (maybe delete somewhere unexpected?)", userFriendlyReason: userFlagReasonInternalError)
+                return false
+            }
             var newText = userText;
             newText.insert(replacementString.first!, at: userText.index(userText.startIndex, offsetBy: range.location));
+            textField.text = newText;
             
             // compare corrected sentence against expected result
             if(newText == typoSentence.fullCorrect)
             {
                 self.finishedEditing = Date.now;
-                textField.text = newText;
             }
-            logger.debugMessage("\(#function): true")
-            return true;
+            
+            logger.debugMessage("\(#function): true") // TODO: Somehow jumps to end of line after inserting here??
+            return false // return false here: we make the changes to the text, not the textfield
         }
     }
     
@@ -108,11 +114,11 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
         if let selectedRange = textField.selectedTextRange {
             let cursorPosition = textField.offset(from: textField.beginningOfDocument, to: selectedRange.start)
             
-            // set finishedSelecting once user moves cursor to correct position (only if not TapFix)
+            // set finishedSelecting once user moves cursor to correct position
             // note: this also sets finishedSelecting if user "overshoots"..
             // .. but this doesnt matter since the user has to move the cursor back to correct the text, thus overwriting it again (only if not finished editing yet)
-            if(finishedEditing.timeIntervalSinceReferenceDate == 0 && self.correctionMethod != .TapFix
-               && (self.typoSentence.typoSentenceIndex.contains(cursorPosition - (correctionType == .Replace ? 0 : 1)))) // TODO: Legacy "add 1 if deletion task". What does this do?
+            if(finishedEditing.timeIntervalSinceReferenceDate == 0
+               && (self.typoSentence.typoSentenceIndex.contains(cursorPosition - (correctionType == .Replace ? 0 : 1))))
             {
                 finishedSelecting = Date.now
                 logger.debugMessage("\(#function): finishedSelecting = \(self.finishedSelecting)")

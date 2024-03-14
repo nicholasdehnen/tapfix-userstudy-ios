@@ -9,7 +9,7 @@ import Foundation
 
 enum TypoCorrectionMethod : String, Codable {
     case SpacebarSwipe = "SpacebarSwipe"
-    case TextFieldLongPress = "TextFieldLongPress"
+    case TextFieldLongPress = "TextLens"
     case TapFix = "TapFix"
 }
 

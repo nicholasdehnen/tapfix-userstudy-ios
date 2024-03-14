@@ -78,7 +78,7 @@ struct TypoCorrectionView: View {
                     }
             )
             
-            Button(action: vm.calculateStatsAndFinish)
+            Button(action: vm.completeTask)
             {
                 Text(vm.editingAllowed ? "Proceed" : "Please wait.. \(vm.forcedWaitTime-timerCountUp)")
                     .onReceive(timer) { _ in
