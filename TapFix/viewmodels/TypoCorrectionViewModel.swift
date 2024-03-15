@@ -102,15 +102,30 @@ class TypoCorrectionViewModel : ObservableObject
                                           TaskCompletionTime: stats.taskCompletionTime, CursorPositioningTime: stats.positioningTime, CharacterDeletionTime: stats.correctionTime, CharacterInsertionTime: stats.insertionTime, Flagged: self.testFlagged)
         self.completionHandler(result);
         
-        let flagString = self.testFlagged ? "⚑ " : ""
-        var statsInfoMessage = flagString + String(format: "Task statistics: taskCompletionTime = %.3fs, positioningTime = %.3fs, correctionTime = %.3fs", stats.taskCompletionTime, stats.positioningTime, stats.correctionTime)
+        let taskDescription = "\(correctionMethod.description)-\(correctionType.description)-Task \(taskId)\(self.testFlagged ? "⚑" : "")"
+        var statsInfoMessage = taskDescription + String(format: " statistics: taskCompletionTime = %.3fs, positioningTime = %.3fs", stats.taskCompletionTime, stats.positioningTime)
         
-        // insert special case
-        if self.typoSentence is InsertTypoSentence {
+        // Conditionally append correction ("deletion") time
+        if stats.correctionTime > 0 {
+            statsInfoMessage.append(String(format: ", correctionTime = %.3fs", stats.correctionTime))
+        }
+        
+        // Conditionally append insertion time
+        if stats.insertionTime > 0 {
             statsInfoMessage.append(String(format: ", insertionTime = %.3fs", stats.insertionTime))
         }
         
+        // Log the stats
         logger.infoMessage(statsInfoMessage)
+        logger.debugMessage {
+            let eps = 0.0005
+            let valuesSumUp = stats.taskCompletionTime.isClose(to: (stats.positioningTime + stats.correctionTime + stats.insertionTime), within: eps)
+            let taskCompletionTimeNonZero = stats.taskCompletionTime > eps
+            let positioningTimeNonZero = stats.positioningTime > eps
+            let textOpsTimeNonZero = (stats.correctionTime + stats.insertionTime) > eps
+            let statsMakeSense = valuesSumUp && taskCompletionTimeNonZero && positioningTimeNonZero && textOpsTimeNonZero
+            return ("Stats make sense: \(statsMakeSense) (valuesSumUp = \(valuesSumUp), taskCompletionTimeNonZero = \(taskCompletionTimeNonZero), positioningTimeNonZero = \(positioningTimeNonZero), textOpsTimeNonZero = \(textOpsTimeNonZero))")
+        }
     }
     
     func shouldReturn(textField: PaddedTextField) -> Bool
@@ -149,16 +164,14 @@ class TypoCorrectionViewModel : ObservableObject
     
     func finish(at now: Date = Date.now) {
         logger.infoMessage("Test \(self.taskId) finished.")
+        
         // set all undefined dates to now
-        if self.finishedSelecting == self.refDate {
-            self.finishedSelecting = now
-        }
-        if self.finishedCorrecting  == self.refDate {
-            self.finishedCorrecting = now
-        }
-        if self.finishedEditing == self.refDate {
-            self.finishedEditing = now
-        }
+        self.finishedSelecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "finishedSelecting")
+        self.finishedCorrecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "finishedCorrecting")
+        self.finishedEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "finishedEditing")
+        self.finishedInserting.updateIfReferenceDate(with: now, logWith: logger, logAs: "finishedInserting")
+        
+        // mark test as finished and disable method (eg. tapfix)
         self.testFinished = true
         self.methodActive = false
     }

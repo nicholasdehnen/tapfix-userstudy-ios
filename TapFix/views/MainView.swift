@@ -19,7 +19,7 @@ struct MainView: View {
     
     #if DEBUG
     let isDebug = true
-    let types: [TypoCorrectionType] = [.Insert, .Replace, .Delete, .Swap]
+    let types: [TypoCorrectionType] = [.Delete, .Replace, .Insert, .Swap]
     @State var methodCounter = 0
     private func generateAndDisplayNewTypo() {
         let correctionMethod = TypoCorrectionMethod.TextFieldLongPress
@@ -27,7 +27,6 @@ struct MainView: View {
         methodCounter += 1
         let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
-        //InsertTypoSentence(prefix: "well", typo: "connectd", correction: "connected", suffix: "with people", full: "well connectd with people", fullCorrect: "well connected with people", typoWordIndex: [7], typoSentenceIndex: [5+7], characterToInsert: "e")
         
         let newViewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType) { [self] _ in
                 self.generateAndDisplayNewTypo() // call self on complete to generate new vm and view

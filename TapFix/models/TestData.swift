@@ -11,6 +11,14 @@ enum TypoCorrectionMethod : String, Codable {
     case SpacebarSwipe = "SpacebarSwipe"
     case TextFieldLongPress = "TextLens"
     case TapFix = "TapFix"
+    
+    var description: String {
+        switch self {
+        case .SpacebarSwipe: return "SpacebarSwipe"
+        case .TextFieldLongPress: return "TextLens"
+        case .TapFix: return "TapFix"
+        }
+    }
 }
 
 enum TypoCorrectionType : String, Codable {
@@ -18,6 +26,15 @@ enum TypoCorrectionType : String, Codable {
     case Delete = "Delete"
     case Insert = "Insert"
     case Swap = "Swap"
+    
+    var description: String {
+        switch self {
+        case .Replace: return "Replace"
+        case .Delete: return "Delete"
+        case .Insert: return "Insert"
+        case .Swap: return "Swap"
+        }
+    }
 }
 
 struct TypingWarmupResult : Codable {

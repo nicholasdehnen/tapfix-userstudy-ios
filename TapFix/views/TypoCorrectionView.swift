@@ -7,7 +7,7 @@
 
 import SwiftUI
 import UIKitTextField
-import Logging
+import Willow
 
 struct TypoCorrectionView: View {
     
@@ -115,6 +115,14 @@ struct TypoCorrectionView: View {
         .overlay (
             HStack {
                 Spacer()
+                if !vm.testFlagged && vm.finishedEditing.isReferenceDate {
+                    Button(action: {vm.flag(reason: "User flagged in TypoCorrectionView", userFriendlyReason: "You manually flagged this test.")}){
+                        Image(systemName: "questionmark.circle")
+                            .foregroundColor(.yellow)
+                            .font(.system(size: 32))
+                            .padding()
+                    }
+                }
                 if vm.testFlagged {
                     Image(systemName: "flag.fill")
                         .foregroundColor(Color(.systemRed))

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKitTextField
+import Willow
 
 
 // Inverted Boolean Binding
@@ -92,5 +93,34 @@ extension Array {
         guard index1 < count, index2 < count, index1 != index2 else { return newArray }
         newArray.swapAt(index1, index2)
         return newArray
+    }
+}
+
+
+// Allow Date to be easily compared to reference Date (timeIntervalSinceReferenceDate == 0)
+extension Date {
+    var isReferenceDate: Bool {
+        return self.timeIntervalSinceReferenceDate == 0
+    }
+    
+    static var referenceDate: Date {
+        return Date(timeIntervalSinceReferenceDate: 0)
+    }
+    
+    mutating func updateIfReferenceDate(with newDate: Date = Date.now, logWith logger: Logger? = nil, logAs logName: String = "date", logLevel : LogLevel = .debug)
+    {
+        if self.isReferenceDate {
+            if let logger = logger {
+                logger.logMessage({"Updating \(logName) = \(newDate)"}, with: logLevel)
+            }
+            self = newDate
+        }
+    }
+}
+
+// Allow Double to be compared with another, given
+extension Double {
+    func isClose(to value: Double, within delta: Double = Double.ulpOfOne) -> Bool {
+        return abs(self - value) <= delta
     }
 }
