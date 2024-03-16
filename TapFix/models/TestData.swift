@@ -42,6 +42,10 @@ struct TypingWarmupResult : Codable {
     var CorrectSentence: String;
     var TypedSentence: String;
     var TaskCompletionTime: Double;
+    
+    enum CodingKeys: String, CodingKey, CaseIterable {
+        case Id, CorrectSentence, TypedSentence, TaskCompletionTime
+    }
 }
 
 struct TypoCorrectionResult : Codable {
@@ -59,6 +63,10 @@ struct TypoCorrectionResult : Codable {
     var CharacterInsertionTime: Double;
     
     var Flagged: Bool;
+    
+    enum CodingKeys: String, CodingKey, CaseIterable {
+        case Id, Flagged, CorrectionMethod, CorrectionType, TaskCompletionTime, MethodActivationTime, CursorPositioningTime, CharacterDeletionTime, CharacterInsertionTime, FaultySentence, UserCorrectedSentence
+    }
 }
 
 struct TestData : Codable {

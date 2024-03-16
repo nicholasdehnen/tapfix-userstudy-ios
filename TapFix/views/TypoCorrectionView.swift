@@ -45,7 +45,7 @@ struct TypoCorrectionView: View {
             }
             
             UIKitTextField(
-                config: .init {PaddedTextField()}
+                config: .init {PaddedTextFieldWithTouchCallbacks()}
                     .configure { uiTextField in
                         uiTextField.padding = .init(top: 8, left: 8, bottom: 8, right: 8)
                         //uiTextField.backgroundColor = .clear

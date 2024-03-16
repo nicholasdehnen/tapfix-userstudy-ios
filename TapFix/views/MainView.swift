@@ -18,7 +18,7 @@ struct MainView: View {
     @State private var typoCorrectionViewModel: TypoCorrectionViewModel?
     
     #if DEBUG
-    let isDebug = true
+    let isDebug = false
     let types: [TypoCorrectionType] = [.Delete, .Replace, .Insert, .Swap]
     @State var methodCounter = 0
     private func generateAndDisplayNewTypo() {

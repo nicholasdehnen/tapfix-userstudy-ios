@@ -15,12 +15,15 @@ class TestManager : ObservableObject {
     
     var documentsDirectory: URL;
     var testDataFile: URL;
-    var testDataCsvFile: URL;
+    var testDataWarmupCsvFile: URL;
+    var testDataTestsCsvFile: URL;
     var testIdentifier: String;
     var testData: TestData;
     var testDataFileSet: Bool = false;
     let jsonEncoder: JSONEncoder;
-    let csvEncoder: CSVEncoder;
+    //let csvEncoder: CSVEncoder;
+    let warmupCsvEncoder: CSVEncoder;
+    let testCsvEncoder: CSVEncoder;
     
     private let logger = buildWillowLogger(name: "TestManager")
     
@@ -44,9 +47,9 @@ class TestManager : ObservableObject {
     
     @Published var UseForcedWaitTime: Bool = true
     @Published var WaitTimesForCorrectionTypes: [TypoCorrectionType: Int] = [
-        .Replace: 3,
-        .Delete: 1, // easiest to grasp
-        .Insert: 3,
+        .Replace: 1,
+        .Delete: 1,
+        .Insert: 1,
         .Swap: 2
     ]
     
@@ -59,11 +62,13 @@ class TestManager : ObservableObject {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         documentsDirectory = paths[0]
         testDataFile = documentsDirectory.appendingPathComponent("not-set.txt")
-        testDataCsvFile = documentsDirectory.appendingPathComponent("not-set.csv")
+        testDataWarmupCsvFile = documentsDirectory.appendingPathComponent("not-set-warmup.csv")
+        testDataTestsCsvFile = documentsDirectory.appendingPathComponent("not-set-tests.csv")
         testData = TestData()
         jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .prettyPrinted
-        csvEncoder = CSVEncoder()
+        warmupCsvEncoder = CSVEncoder { $0.headers = TypingWarmupResult.CodingKeys.allCases.map { $0.rawValue }}
+        testCsvEncoder = CSVEncoder { $0.headers = TypoCorrectionResult.CodingKeys.allCases.map { $0.rawValue }}
         testIdentifier = "not-set"
         logger.debugMessage("Initialized, documentsDirectory: \(self.documentsDirectory)")
     }
@@ -80,7 +85,8 @@ class TestManager : ObservableObject {
             // create file name from participant id + date
             testIdentifier = "p\(testData.ParticipantId)_d\(formattedDate)"
             testDataFile = documentsDirectory.appendingPathComponent("\(testIdentifier).json");
-            testDataCsvFile = documentsDirectory.appendingPathComponent("\(testIdentifier).csv");
+            testDataWarmupCsvFile = documentsDirectory.appendingPathComponent("\(testIdentifier)-warmup.csv");
+            testDataTestsCsvFile = documentsDirectory.appendingPathComponent("\(testIdentifier)-tests.csv");
             
             testDataFileSet = true;
             logger.debugMessage("Test data file was not yet set, set to: \(self.testDataFile)")
@@ -94,10 +100,16 @@ class TestManager : ObservableObject {
             logger.errorMessage("Error writing test data json file: \(error.localizedDescription)")
         }
         
-        // csv (experimental)
+        // csv
         do {
-            let testDataCsv = try csvEncoder.encode([testData])
-            try testDataCsv.write(to: testDataCsvFile)
+            if testData.TypingWarmupResults.count != WarmupLength && !SkipWarmups { // warmup not done yet
+                let warmupDataCsv = try warmupCsvEncoder.encode(testData.TypingWarmupResults)
+                try warmupDataCsv.write(to: testDataWarmupCsvFile)
+            }
+            else {
+                let testDataCsv = try testCsvEncoder.encode(testData.CorrectionResults)
+                try testDataCsv.write(to: testDataTestsCsvFile)
+            }
         } catch let error {
             logger.errorMessage("Error writing test data csv file: \(error.localizedDescription)")
         }
@@ -169,8 +181,9 @@ class TestManager : ObservableObject {
         
         for i in 0..<shuffledTests.count {
             let test = shuffledTests[i] as (method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)
-            if methodsSeen[test.method]! == false {
-                // prepend warmup
+            if methodsSeen[test.method]! == false || (test.method == .TapFix) {
+                // prepend warmup, once for baseline methods, always for tapfix
+                // editing for baseline is the same (cursor positioning), however changes depending on correction type for tapfix
                 TestOrder.append((test.method, test.type, true))
                 methodsSeen[test.method] = true
             }

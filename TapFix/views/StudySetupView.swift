@@ -140,6 +140,7 @@ struct StudySetupView: View  {
                             Text("Modify order..").foregroundStyle(.blue)
                         }
                     }
+                    
                     Section {
                         Button("Done")
                         {

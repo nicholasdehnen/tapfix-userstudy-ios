@@ -122,9 +122,14 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
         }
     }
     
+    override func onTextFieldTouched(_ touches: [UITouch])
+    {
+        self.beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing")
+    }
+    
     override func onBeganEditing(textField: PaddedTextField)
     {
-        self.beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing-onBeganEditing")
+        self.beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing")
     }
     
     override func onChangedSelection(textField: PaddedTextField)
@@ -142,9 +147,9 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
             return
         }
         
-        // We're selecting! Set beganEditing if not set and definitely set beganSelecting
+        // We're selecting! Set beganEditing and beganSelecting if not already set.
         let now = Date.now
-        self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing-onChangedSelection")
+        self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing")
         self.beganSelecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganSelecting")
         
         if let selectedRange = textField.selectedTextRange {

@@ -186,18 +186,31 @@ class TypoCorrectionViewModel : ObservableObject
         self.methodActive = false
     }
     
-    func updateUiKitTextField(_ textField: UITextField) {
+    @discardableResult
+    func updateUiKitTextField(_ textField: UITextField) -> Bool {
         if textField == self.textField {
-            return // do not update, we already have this
+            return false // do not update, we already have this
         }
         
+        // Log TextField change
         logger.debugMessage {
             let old = self.textField == nil ? "nil" : Unmanaged.passUnretained(self.textField!).toOpaque().debugDescription
             let new = Unmanaged.passUnretained(textField).toOpaque().debugDescription
             return "\(#function): Updating textField \(old) -> \(new)"
         }
+        
+        // Add gesture recognizer
         textField.addGestureRecognizer(self.tapGesture!)
-        self.textField = textField
+        logger.debugMessage("\(#function): Added gestureRecognizer to textField.")
+        
+        // Add touch detection
+        if let tf = textField as? PaddedTextFieldWithTouchCallbacks {
+            tf.touchesBeganHandler = self.onTextFieldTouched(_:)
+            logger.debugMessage("\(#function): Added touchesBeganHandler to textField.")
+        }
+        
+        self.textField = textField // finally, store textField for later use (tapOnTextField needs it)
+        return true
     }
     
     @objc private func tapOnTextField(_ tapGesture: UITapGestureRecognizer){
@@ -212,8 +225,10 @@ class TypoCorrectionViewModel : ObservableObject
         }
     }
     
+    // Exposed to potential sub-classes, not used in base model
     func onBeganEditing(textField: PaddedTextField) {}
     func onChangedSelection(textField: PaddedTextField) {}
     func shouldChangeCharacters(textField: PaddedTextField, range: NSRange, replacementString: String) -> Bool { return true }
     func onTripleTapDetected(word: String, range: ClosedRange<Int>) {}
+    func onTextFieldTouched(_ touches: [UITouch]) {}
 }

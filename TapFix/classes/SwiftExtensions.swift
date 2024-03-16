@@ -47,18 +47,31 @@ class PaddedTextField: BaseUITextField {
     }
 }
 
-extension UITextField {
-    //func wordAtPosition(_ position: CGPoint) -> String? {
-    //    guard let textPosition = closestPosition(to: position),
-    //          let range = tokenizer.rangeEnclosingPosition(textPosition, with: .word, inDirection: UITextDirection.layout(UITextLayoutDirection.right)) else { return nil }
-    //
-    //    let startIndex = offset(from: beginningOfDocument, to: range.start)
-    //    let endIndex = offset(from: beginningOfDocument, to: range.end)
-    //    guard let text = self.text, startIndex < endIndex else { return nil }
-    //
-    //    return String(text[text.index(text.startIndex, offsetBy: startIndex)..<text.index(text.startIndex, offsetBy: endIndex)])
-    //}
+// PaddedTextField with low-level touch callbacks
+class PaddedTextFieldWithTouchCallbacks : PaddedTextField {
+    var touchesBeganHandler : ((_ touches: [UITouch] ) -> Void)? = nil
+    var touchesMovedHandler : ((_ touches: [UITouch], _ locations : [CGPoint]) -> Void)? = nil
+    var touchesEndedHandler : ((_ touches: [UITouch] ) -> Void)? = nil
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        touchesBeganHandler?(Array(touches))
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
+        touchesMovedHandler?(Array(touches), touches.map { $0.location(in: self) })
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        touchesEndedHandler?(Array(touches))
+    }
+}
+
+
+// Allow getting word at coordinate (hit-test) from UITextField
+extension UITextField {
     func wordAtPosition(_ point: CGPoint) -> String? {
         if let textPosition = closestPosition(to: point)
         {
@@ -132,11 +145,14 @@ extension Date {
         return Date(timeIntervalSinceReferenceDate: 0)
     }
     
-    mutating func updateIfReferenceDate(with newDate: Date = Date.now, logWith logger: Logger? = nil, logAs logName: String = "date", logLevel : LogLevel = .debug)
+    mutating func updateIfReferenceDate(with newDate: Date = Date.now, logWith logger: Logger? = nil, logAs logName: String = "date",
+                                        logSource: String = #function, logLevel : LogLevel = .debug)
     {
         if self.isReferenceDate {
             if let logger = logger {
-                logger.logMessage({"Updating \(logName) = \(newDate)"}, with: logLevel)
+                logger.logMessage({
+                    "Updating \(logName) = \(newDate)" + (" (Source: \(logSource))")
+                }, with: logLevel)
             }
             self = newDate
         }
