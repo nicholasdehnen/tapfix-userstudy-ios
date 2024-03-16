@@ -15,7 +15,7 @@ enum TypoCorrectionMethod : String, Codable {
     var description: String {
         switch self {
         case .SpacebarSwipe: return "SpacebarSwipe"
-        case .TextFieldLongPress: return "TextLens"
+        case .TextFieldLongPress: return "MagnifyingGlass"
         case .TapFix: return "TapFix"
         }
     }
@@ -53,6 +53,7 @@ struct TypoCorrectionResult : Codable {
     var UserCorrectedSentence: String;
     
     var TaskCompletionTime: Double;
+    var MethodActivationTime: Double;
     var CursorPositioningTime: Double;
     var CharacterDeletionTime: Double;
     var CharacterInsertionTime: Double;

@@ -12,7 +12,7 @@ import UIKit
 class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
 {
     @Published var tapFixWord: String;
-    @Published var legalSelectionIndices: [Int];
+    @Published var legalSelectionIndices: [Int]
     var tapFixRange: NSRange;
     
     internal init(id: Int, typoSentence: TypoSentenceProtocol, correctionType: TypoCorrectionType, completionHandler: @escaping (TypoCorrectionResult) -> Void, preview: Bool = false) {
@@ -23,14 +23,24 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
         super.init(id: id, typoSentence: typoSentence, correctionMethod: .TapFix, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
     }
     
-    override func calculateStats() -> (taskCompletionTime: Double, insertionTime: Double, positioningTime: Double, correctionTime: Double) {
+    override func calculateStats() -> TaskStatistics {
         var superStats = super.calculateStats()
         
-        // TapFix special case: if Insert, positioningTime is counted from Insertion on
-        // -> This is because order is inverted, character is first inserted, then moved to the correct place
-        if self.typoSentence is InsertTypoSentence {
+        switch(correctionType)
+        {
+        case .Insert:
+            // TapFix quirk: if Insert, positioningTime is counted from Insertion on
+            // -> This is because order is inverted, character is first inserted, then moved to the correct place
             superStats.positioningTime = finishedInserting.distance(to: finishedSelecting)
             superStats.correctionTime = finishedSelecting.distance(to: finishedEditing) // cascades to correctionTime
+        case .Delete:
+            superStats.insertionTime = 0
+            break
+        case .Replace:
+            superStats.insertionTime = 0 // TapFix quirk: Insertion/Correction on Replace task is same
+            break
+        case .Swap:
+            superStats.insertionTime = 0 // TapFix quirk: No insertion time at all
         }
         
         return superStats
@@ -83,65 +93,38 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
     
     override func onBeganEditing(textField: PaddedTextField)
     {
-        logger.debugMessage("\(#function): beganEditing = \(self.beganEditing) (unset = \(self.beganEditing.timeIntervalSinceReferenceDate == 0))")
-        // set beganEditing if not set
-        if(beganEditing.timeIntervalSinceReferenceDate == 0)
-        {
-            beganEditing = Date.now;
-        }
+        beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing")
     }
     
-    override func onChangedSelection(textField: PaddedTextField)
+    override func onTripleTapDetected(word: String, range: ClosedRange<Int>)
     {
-        logger.debugMessage("\(#function): textField.selectedTextRange = \(textField.selectedSwiftTextRange?.description ?? "<none>")")
-        
-        if(!self.editingAllowed || self.testFinished)
-        {
+        if !self.editingAllowed || self.testFinished {
             logger.debugMessage("\(#function): Editing not allowed\(self.testFinished ? " anymore" : " yet"), returning.")
-            textField.selectedTextRange = nil // undo selection and return
-            if(!self.testFinished) {
+            if !self.testFinished {
                 self.notifyUser(message: "Please take time to read the sentence before correcting it.")
             }
             return
         }
         
-        if(self.beganEditing.timeIntervalSinceReferenceDate == 0)
-        {
-            //corner case: began selecting without onBeganEditing called?
-            self.beganEditing = Date.now
-            logger.debugMessage("\(#function): beganEditing = \(self.beganEditing)")
-        }
+        let now = Date.now
+        self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing") // maybe add onsingletap for this
+        self.beganSelecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganSelecting")
         
-        if(self.beganEditing.timeIntervalSinceReferenceDate != 0 && self.beganSelecting.timeIntervalSinceReferenceDate == 0) {
+        if word == typoSentence.typo {
             self.beganSelecting = Date.now
-            logger.debugMessage("\(#function): beganSelecting = \(self.beganSelecting)")
+            self.tapFixWord = word
+            self.methodActive = true
+            logger.debugMessage("\(#function): methodActive = \(self.methodActive)")
         }
-        
-        if(finishedEditing.timeIntervalSinceReferenceDate == 0 && userText.compare(typoSentence.full) != .orderedSame)
-        {
-            // user made an error, flag test
-            self.flag(reason: "Unexpected text change: \(self.userText) != \(self.typoSentence.full)",
-                      userFriendlyReason: "The text was changed in an unexpected way. Please try again.")
-            return
+        else {
+            notifyUser(message: "This word does not need correction.")
         }
-        
-        if let selectedRange = textField.selectedTextRange {
-            if selectedRange.end != textField.position(from: selectedRange.start, offset: 0), let tapFixWord_ = textField.text(in: selectedRange) {
-                // as part of user study, only open tapfix when correct selection is made
-                // (same behaviour as with deletion / selection on other methods)
-                if(tapFixWord_ == typoSentence.typo)
-                {
-                    self.beganSelecting = Date.now
-                    self.tapFixWord = tapFixWord_
-                    self.methodActive = true
-                    logger.debugMessage("\(#function): methodActive = \(self.methodActive)")
-                }
-                else {
-                    notifyUser(message: "This word does not need correction.")
-                }
-                textField.selectedTextRange = nil
-            }
-        }
+    }
+    
+    override func onChangedSelection(textField: PaddedTextField)
+    {
+        // Reject any selections for tapfix
+        textField.selectedTextRange = nil
     }
     
     func handleInsertChange(_ oldText: String, _ newText: String) -> Bool {
@@ -221,8 +204,6 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
             var shouldChangeText = true
             var newString = userText
             newString.replaceSubrange(stringRange, with: newText)
-            
-            // TODO: Check how finishedCorrecting was used, we might have lost some information here
             
             // check if insert task, if so, update correct index for user to touch when swapping
             if self.correctionType == .Insert {

@@ -49,6 +49,12 @@ struct TypoCorrectionView: View {
                     .configure { uiTextField in
                         uiTextField.padding = .init(top: 8, left: 8, bottom: 8, right: 8)
                         //uiTextField.backgroundColor = .clear
+                        
+                        // expose uiTextField to VM for UIKit gesture recognition
+                        // needs to be dispatched separately or apple gets angry
+                        DispatchQueue.main.async { [self] in
+                            vm.updateUiKitTextField(uiTextField)
+                        }
                     }
                     .value(text: $vm.userText)
                     .focused($vm.textFieldIsFocused)
@@ -70,13 +76,6 @@ struct TypoCorrectionView: View {
             )
             .background(vm.editingAllowed ? Color(.clear) : Color(.systemGray6))
             .padding(.all, vm.preview ? 0 : nil)
-            .gesture(
-                TapGesture(count: 3)
-                    .onEnded { _ in
-                        // do something, find word tapped on
-                        // TODO: Somehow make triple-tap work here.
-                    }
-            )
             
             Button(action: vm.completeTask)
             {

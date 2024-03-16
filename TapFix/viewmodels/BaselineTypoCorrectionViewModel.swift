@@ -36,7 +36,7 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
         }
     }
     
-    override func calculateStats() -> (taskCompletionTime: Double, insertionTime: Double, positioningTime: Double, correctionTime: Double) {
+    override func calculateStats() -> TaskStatistics {
         var superStats = super.calculateStats()
         
         // Baseline methods: Insertion time heavily depends on correction type
@@ -52,7 +52,7 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
             superStats.insertionTime = 0 // Delete has no insertion time (no inserts taking place)
             break
         case .Insert:
-            superStats.insertionTime = finishedSelecting.distance(to: finishedInserting) // Insert time starts from assuming correct insertion position
+            //superStats.insertionTime = finishedSelecting.distance(to: finishedInserting) // Insert time starts from assuming correct insertion position
             superStats.correctionTime = 0 // Insert has no correction time (no deletes taking place)
             break
         }
@@ -124,12 +124,12 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
     
     override func onBeganEditing(textField: PaddedTextField)
     {
-        self.beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing")
+        self.beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing-onBeganEditing")
     }
     
     override func onChangedSelection(textField: PaddedTextField)
     {
-        //logger.debugMessage("\(#function): textField.selectedTextRange = \(textField.selectedSwiftTextRange?.description ?? "<none>")")
+        logger.debugMessage("\(#function): textField.selectedTextRange = \(textField.selectedSwiftTextRange?.description ?? "<none>")")
         
         // Do not allow editing when (a) test just started and forcedWaitTime still running or (b) test finished
         if(!self.editingAllowed || self.testFinished)
@@ -144,7 +144,7 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
         
         // We're selecting! Set beganEditing if not set and definitely set beganSelecting
         let now = Date.now
-        self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing")
+        self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing-onChangedSelection")
         self.beganSelecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganSelecting")
         
         if let selectedRange = textField.selectedTextRange {

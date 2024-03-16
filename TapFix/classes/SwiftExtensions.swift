@@ -47,6 +47,31 @@ class PaddedTextField: BaseUITextField {
     }
 }
 
+extension UITextField {
+    //func wordAtPosition(_ position: CGPoint) -> String? {
+    //    guard let textPosition = closestPosition(to: position),
+    //          let range = tokenizer.rangeEnclosingPosition(textPosition, with: .word, inDirection: UITextDirection.layout(UITextLayoutDirection.right)) else { return nil }
+    //
+    //    let startIndex = offset(from: beginningOfDocument, to: range.start)
+    //    let endIndex = offset(from: beginningOfDocument, to: range.end)
+    //    guard let text = self.text, startIndex < endIndex else { return nil }
+    //
+    //    return String(text[text.index(text.startIndex, offsetBy: startIndex)..<text.index(text.startIndex, offsetBy: endIndex)])
+    //}
+    
+    func wordAtPosition(_ point: CGPoint) -> String? {
+        if let textPosition = closestPosition(to: point)
+        {
+            if let range = tokenizer.rangeEnclosingPosition(textPosition, with: .word, inDirection: UITextDirection(rawValue: 1))
+            {
+                return self.text(in: range)
+            }
+        }
+        return nil
+    }
+}
+
+
 // UITextInput range as NSRange
 // from: https://stackoverflow.com/a/38805072
 extension UITextInput {

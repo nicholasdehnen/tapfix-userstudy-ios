@@ -35,6 +35,10 @@ class TypoCorrectionViewModel : ObservableObject
     @Published var notificationToastMessage: String
     @Published var notificationToastDuration: Double
     
+    // Cursed SwiftUI <> UIKit interaction
+    @Published var textField: UITextField? = nil
+    @Published var tapGesture: UITapGestureRecognizer? = nil
+    
     let completionHandler: (TypoCorrectionResult) -> Void
     let preview: Bool
     
@@ -46,6 +50,8 @@ class TypoCorrectionViewModel : ObservableObject
     internal var className: String { return String(describing: type(of: self))}
     internal var logger: Logger! = nil
     internal let userFlagReasonInternalError = "Sorry, an internal error occurred. Please try again."
+    
+    typealias TaskStatistics = (taskCompletionTime: Double, insertionTime: Double, positioningTime: Double, correctionTime: Double, methodActivationTime: Double)
     
     internal init(id: Int, typoSentence: TypoSentenceProtocol, correctionMethod: TypoCorrectionMethod, correctionType: TypoCorrectionType, completionHandler: @escaping (TypoCorrectionResult) -> Void, preview: Bool = false) {
         
@@ -81,29 +87,33 @@ class TypoCorrectionViewModel : ObservableObject
         self.notificationToastDuration = 3
         
         self.logger = buildWillowLogger(name: "\(className)-\(id)")
+        
+        self.tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapOnTextField(_:)))
+        self.tapGesture!.numberOfTapsRequired = 3 // Triple-Tap for TapFix
     }
     
-    func calculateStats() -> (taskCompletionTime: Double, insertionTime: Double, positioningTime: Double, correctionTime: Double)
+    func calculateStats() -> TaskStatistics
     {
         let taskCompletionTime = beganEditing.distance(to: finishedEditing)
-        let insertionTime = beganEditing.distance(to: finishedInserting)
-        let positioningTime = beganEditing.distance(to: finishedSelecting)
+        let methodActivationTime = beganEditing.distance(to: beganSelecting)
+        let insertionTime = finishedSelecting.distance(to: finishedInserting)
+        let positioningTime = beganSelecting.distance(to: finishedSelecting)
         let correctionTime = finishedSelecting.distance(to: finishedCorrecting)
         
         return (taskCompletionTime: taskCompletionTime, insertionTime: insertionTime,
-                positioningTime: positioningTime, correctionTime: correctionTime)
+                positioningTime: positioningTime, correctionTime: correctionTime, methodActivationTime: methodActivationTime)
     }
     
     func completeTask()
     {
         let stats = self.calculateStats()
         
-        let result = TypoCorrectionResult(Id: self.taskId, CorrectionMethod: self.correctionMethod, CorrectionType: self.correctionType, FaultySentence: self.typoSentence.full, UserCorrectedSentence: self.typoSentence.fullCorrect,
-                                          TaskCompletionTime: stats.taskCompletionTime, CursorPositioningTime: stats.positioningTime, CharacterDeletionTime: stats.correctionTime, CharacterInsertionTime: stats.insertionTime, Flagged: self.testFlagged)
+        let result = TypoCorrectionResult(Id: self.taskId, CorrectionMethod: self.correctionMethod, CorrectionType: self.correctionType, FaultySentence: self.typoSentence.full, UserCorrectedSentence: self.typoSentence.fullCorrect, TaskCompletionTime: stats.taskCompletionTime, MethodActivationTime: stats.methodActivationTime, CursorPositioningTime: stats.positioningTime, CharacterDeletionTime: stats.correctionTime, CharacterInsertionTime: stats.insertionTime, Flagged: self.testFlagged)
         self.completionHandler(result);
         
         let taskDescription = "\(correctionMethod.description)-\(correctionType.description)-Task \(taskId)\(self.testFlagged ? "⚑" : "")"
-        var statsInfoMessage = taskDescription + String(format: " statistics: taskCompletionTime = %.3fs, positioningTime = %.3fs", stats.taskCompletionTime, stats.positioningTime)
+        var statsInfoMessage = taskDescription + String(format: " statistics: taskCompletionTime = %.3fs, methodActivationTime = %.3fs, positioningTime = %.3fs",
+                                                        stats.taskCompletionTime, stats.methodActivationTime, stats.positioningTime)
         
         // Conditionally append correction ("deletion") time
         if stats.correctionTime > 0 {
@@ -119,7 +129,7 @@ class TypoCorrectionViewModel : ObservableObject
         logger.infoMessage(statsInfoMessage)
         logger.debugMessage {
             let eps = 0.0005
-            let valuesSumUp = stats.taskCompletionTime.isClose(to: (stats.positioningTime + stats.correctionTime + stats.insertionTime), within: eps)
+            let valuesSumUp = stats.taskCompletionTime.isClose(to: (stats.methodActivationTime + stats.positioningTime + stats.correctionTime + stats.insertionTime), within: eps)
             let taskCompletionTimeNonZero = stats.taskCompletionTime > eps
             let positioningTimeNonZero = stats.positioningTime > eps
             let textOpsTimeNonZero = (stats.correctionTime + stats.insertionTime) > eps
@@ -176,7 +186,34 @@ class TypoCorrectionViewModel : ObservableObject
         self.methodActive = false
     }
     
+    func updateUiKitTextField(_ textField: UITextField) {
+        if textField == self.textField {
+            return // do not update, we already have this
+        }
+        
+        logger.debugMessage {
+            let old = self.textField == nil ? "nil" : Unmanaged.passUnretained(self.textField!).toOpaque().debugDescription
+            let new = Unmanaged.passUnretained(textField).toOpaque().debugDescription
+            return "\(#function): Updating textField \(old) -> \(new)"
+        }
+        textField.addGestureRecognizer(self.tapGesture!)
+        self.textField = textField
+    }
+    
+    @objc private func tapOnTextField(_ tapGesture: UITapGestureRecognizer){
+        let point = tapGesture.location(in: textField)
+        if let detectedWord = textField!.wordAtPosition(point),
+           let range = userText.range(of: detectedWord)
+        {
+            let startIndex = userText.distance(from: userText.startIndex, to: range.lowerBound)
+            let endIndex = userText.distance(from: userText.startIndex, to: range.upperBound) - 1
+            logger.debugMessage("\(#function): Triple-tap detected on: '\(detectedWord)' [\(startIndex), \(endIndex)]")
+            self.onTripleTapDetected(word: detectedWord, range: startIndex ... endIndex)
+        }
+    }
+    
     func onBeganEditing(textField: PaddedTextField) {}
     func onChangedSelection(textField: PaddedTextField) {}
     func shouldChangeCharacters(textField: PaddedTextField, range: NSRange, replacementString: String) -> Bool { return true }
+    func onTripleTapDetected(word: String, range: ClosedRange<Int>) {}
 }
