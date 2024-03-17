@@ -7,6 +7,8 @@
 
 import Foundation
 
+typealias TestOrderInformation = (method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)
+
 enum TypoCorrectionMethod : String, Codable {
     case SpacebarSwipe = "SpacebarSwipe"
     case TextFieldLongPress = "TextLens"
@@ -65,14 +67,28 @@ struct TypoCorrectionResult : Codable {
     var Flagged: Bool;
     
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case Id, Flagged, CorrectionMethod, CorrectionType, TaskCompletionTime, MethodActivationTime, CursorPositioningTime, CharacterDeletionTime, CharacterInsertionTime, FaultySentence, UserCorrectedSentence
+        case Id, Flagged, CorrectionMethod, CorrectionType, TaskCompletionTime, MethodActivationTime, CursorPositioningTime,
+             CharacterDeletionTime, CharacterInsertionTime, FaultySentence, UserCorrectedSentence
     }
 }
 
+struct TestInformation : Codable {
+    var AppVersion: String
+    var ParticipantId: Int
+    var TimeStamp: Date
+    
+    enum CodingKeys: String, CodingKey, CaseIterable {
+        case AppVersion, ParticipantId, TimeStamp
+    }
+}
+
+
 struct TestData : Codable {
-    var AppVersion: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown";
-    var ParticipantId: Int = 0;
-    var TimeStamp: Date = Date.now;
+    var Information: TestInformation = TestInformation (
+        AppVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown",
+        ParticipantId: 0,
+        TimeStamp: Date.now
+    )
     
     var TypingWarmupResults: [TypingWarmupResult] = []
     var CorrectionResults: [TypoCorrectionResult] = []

@@ -12,7 +12,7 @@ import Willow
 
 class TypoCorrectionViewModel : ObservableObject
 {
-    @Published var textFieldIsFocused: Bool
+    @Published var textFieldIsFocused: Bool // TODO: Publishes changes in view update
     @Published var typoSentence: TypoSentenceProtocol
     @Published var userText: String
     
@@ -153,7 +153,7 @@ class TypoCorrectionViewModel : ObservableObject
     }
     
     func notifyUser(message: String, duration: Double = 3.0) {
-        logger.debugMessage(#"\(#function): Showing notification toast with message ""\#(message)""#)
+        logger.debugMessage(#"\#(#function): Showing notification toast with message "\#(message)""#)
         self.notificationToastMessage = message
         self.showNotificationToast = true
         

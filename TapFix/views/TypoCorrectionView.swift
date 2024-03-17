@@ -77,19 +77,21 @@ struct TypoCorrectionView: View {
             .background(vm.editingAllowed ? Color(.clear) : Color(.systemGray6))
             .padding(.all, vm.preview ? 0 : nil)
             
-            Button(action: vm.completeTask)
-            {
-                Text(vm.editingAllowed ? "Proceed" : "Please wait.. \(vm.forcedWaitTime-timerCountUp)")
-                    .onReceive(timer) { _ in
-                        timerCountUp += 1
-                        if timerCountUp >= vm.forcedWaitTime {
-                            vm.editingAllowed = true
-                            timer.upstream.connect().cancel()
+            if !vm.preview {
+                Button(action: vm.completeTask)
+                {
+                    Text(vm.editingAllowed ? "Proceed" : "Please wait.. \(vm.forcedWaitTime-timerCountUp)")
+                        .onReceive(timer) { _ in
+                            timerCountUp += 1
+                            if timerCountUp >= vm.forcedWaitTime {
+                                vm.editingAllowed = true
+                                timer.upstream.connect().cancel()
+                            }
                         }
-                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(!vm.editingAllowed || vm.finishedEditing.timeIntervalSinceReferenceDate == 0)
             }
-            .buttonStyle(.bordered)
-            .disabled(!vm.editingAllowed || vm.finishedEditing.timeIntervalSinceReferenceDate == 0)
             
             if vm.testFlagged {
                 Text(vm.testFlagReason)
@@ -114,7 +116,7 @@ struct TypoCorrectionView: View {
         .overlay (
             HStack {
                 Spacer()
-                if !vm.testFlagged && vm.finishedEditing.isReferenceDate {
+                if !vm.preview && !vm.testFlagged && vm.finishedEditing.isReferenceDate {
                     Button(action: {vm.flag(reason: "User flagged in TypoCorrectionView", userFriendlyReason: "You manually flagged this test.")}){
                         Image(systemName: "questionmark.circle")
                             .foregroundColor(.yellow)

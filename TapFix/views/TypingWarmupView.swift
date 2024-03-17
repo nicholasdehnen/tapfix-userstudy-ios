@@ -63,7 +63,7 @@ struct TypingWarmupView: View {
     
     var body: some View {
         VStack {
-            if(sentenceNo < 0)
+            if(sentenceNo < 0 && !TestManager.shared.SkipTypingTest)
             {
                 Text("Typing Warmup")
                     .font(.title)
@@ -107,7 +107,7 @@ struct TypingWarmupView: View {
                     .buttonStyle(.bordered)
                 }
             }
-            else if(sentenceNo < TestManager.shared.TypingTestLength){
+            else if(sentenceNo < TestManager.shared.TypingTestLength && !TestManager.shared.SkipTypingTest){
                 Text("Please copy the following sentence:")
                     .frame(maxWidth: .infinity)
                     .clipped()
@@ -132,7 +132,7 @@ struct TypingWarmupView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 1.0)
-                Text("The typing warm-up is now complete.")
+                Text("The typing warm-up \(TestManager.shared.SkipTypingTest ? "was skipped." : "is now complete.")")
                     .frame(maxWidth: .infinity)
                     .clipped()
                     .padding(.bottom, 25.0)

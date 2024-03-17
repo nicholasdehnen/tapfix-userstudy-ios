@@ -137,64 +137,48 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "56DF4631-BE43-43E7-9D78-1BA58C5E114F"
+            uuid = "6A5E061F-98A8-4853-AFE9-669607A11815"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TapFix/classes/TestManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "114"
-            endingLineNumber = "114"
-            landmarkName = "_updateResultsFile()"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
+            landmarkName = "setUpForTesting()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "78DDD05B-6D81-4FEE-A19A-F41885844EC6"
+            uuid = "ADF73950-F5AD-4D88-B9B1-04B7AB177BAB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TapFix/classes/TestManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "112"
-            endingLineNumber = "112"
-            landmarkName = "_updateResultsFile()"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
+            landmarkName = "setUpForTesting()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "CF430845-7347-48B6-AFB1-CE805B146D11"
+            uuid = "BFE30B2B-03CC-40E5-A4DC-80745EEFFDCC"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "TapFix/classes/TestManager.swift"
+            filePath = "TapFix/classes/TapFixTools.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "104"
-            endingLineNumber = "104"
-            landmarkName = "_updateResultsFile()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "2644908C-ED5B-431C-8805-FD96BF7D2629"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TapFix/classes/TestManager.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "106"
-            endingLineNumber = "106"
-            landmarkName = "_updateResultsFile()"
+            startingLineNumber = "68"
+            endingLineNumber = "68"
+            landmarkName = "buildTypoCorrectionViewModel(id:typoSentence:correctionMethod:correctionType:completionHandler:preview:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

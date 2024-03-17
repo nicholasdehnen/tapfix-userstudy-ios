@@ -11,7 +11,7 @@ struct MainView: View {
     
     @State var testNavigationPath = NavigationPath()
     @StateObject var viewController = ViewController();
-    @State var testOrder: [(method: TypoCorrectionMethod, type: TypoCorrectionType, isWarmup: Bool)] = []
+    @State var testOrder: [TestOrderInformation] = []
     @State var currentTest: Int = 0
     
     @State private var typoCorrectionVmId: UUID = UUID()
@@ -58,6 +58,9 @@ struct MainView: View {
                         removal: .move(edge: .leading) // Exit to the left
                     ))
             }
+            else if TestManager.shared.State == .Failure {
+                ErrorView(errorMessage: TestManager.shared.StatusMessage)
+            }
             else {
                 switch(viewController.currentState)
                 {
@@ -70,7 +73,7 @@ struct MainView: View {
                         .transition(.slide)
                         .onAppear {
                             // these have already been generated at this point, we're just getting them here
-                            testOrder = TestManager.shared.generateTestOrder()
+                            testOrder = TestManager.shared.generateTestOrder() // no idea why this doesnt complain about updates from view thread, maybe cause its not our view
                         }
                 case 2:
                     TypingWarmupView()

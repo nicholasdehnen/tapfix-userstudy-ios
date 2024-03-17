@@ -16,11 +16,11 @@ struct TypoCorrectionTestView: View {
     private let correctionMethodExplanations: [TypoCorrectionMethod : String] = [
         TypoCorrectionMethod.SpacebarSwipe: "Long press the space bar and move your finger horizontally to position the cursor.",
         TypoCorrectionMethod.TextFieldLongPress: "Long press on the text field and use the magnifying glass to position the cursor.",
-        TypoCorrectionMethod.TapFix: "Double-tap a word to activate TapFix."]
+        TypoCorrectionMethod.TapFix: "Triple-tap a word to activate TapFix."]
     
     private let tapFixMethodExplanations: [TypoCorrectionType : String] = [
         TypoCorrectionType.Delete: "Then, swipe up on a letter to delete it.",
-        TypoCorrectionType.Insert: "Then, type a new letter to insert it and drag-and-drop it to the correct position.",
+        TypoCorrectionType.Insert: "Then, type a new letter to insert it and drag it to the correct position.",
         TypoCorrectionType.Replace: "Then, swipe down on a letter and enter a new one to replace it.",
         TypoCorrectionType.Swap: "Then, swap letters using drag-and-drop."
     ]
@@ -31,6 +31,10 @@ struct TypoCorrectionTestView: View {
         if(!vm.isWarmup)
         {
             TestManager.shared.addTypoCorrectionResult(result: result)
+            if result.Flagged {
+                // result was flagged, add another test to make up for it
+                vm.additionalCorrections += 1
+            }
         }
         navigationPath.append(vm.currentSentence)
     }
@@ -93,10 +97,12 @@ struct TypoCorrectionTestView: View {
             }
             .navigationDestination(for: Int.self) { i in
                 VStack {
-                    if(i < vm.correctionCount)
+                    let totalCorrections = (vm.correctionCount + vm.additionalCorrections)
+                    let additionalCorrectionsStr = vm.additionalCorrections > 0 ? " (+\(vm.additionalCorrections))" : ""
+                    if(i < totalCorrections)
                     {
-                        ProgressView(value: Double(i) / Double(vm.correctionCount)) {
-                            Text("Sentence \(i+1) out of \(vm.correctionCount)")
+                        ProgressView(value: Double(i) / Double(totalCorrections)) {
+                            Text("Sentence \(i+1) out of \(vm.correctionCount)\(additionalCorrectionsStr)")
                         }
                         .padding(.horizontal)
                         .padding(.top)
