@@ -10,124 +10,84 @@ import SwiftUI
 struct TypoCorrectionTestView: View {
     
     @EnvironmentObject var viewController: ViewController;
-    @State private var navigationPath = NavigationPath();
     @StateObject var vm: TypoCorrectionTestViewModel
     
-    private let correctionMethodExplanations: [TypoCorrectionMethod : String] = [
-        TypoCorrectionMethod.SpacebarSwipe: "Long press the space bar and move your finger horizontally to position the cursor.",
-        TypoCorrectionMethod.TextFieldLongPress: "Long press on the text field and use the magnifying glass to position the cursor.",
-        TypoCorrectionMethod.TapFix: "Triple-tap a word to activate TapFix."]
+    @State private var currentTestVmId: UUID = UUID()
+    @State private var currentTestVm: TypoCorrectionViewModel?
     
-    private let tapFixMethodExplanations: [TypoCorrectionType : String] = [
-        TypoCorrectionType.Delete: "Then, swipe up on a letter to delete it.",
-        TypoCorrectionType.Insert: "Then, type a new letter to insert it and drag it to the correct position.",
-        TypoCorrectionType.Replace: "Then, swipe down on a letter and enter a new one to replace it.",
-        TypoCorrectionType.Swap: "Then, swap letters using drag-and-drop."
-    ]
+    enum TypoCorrectionTestState: Equatable {
+        case introduction
+        case test(Int)
+        case done
+    }
+    @State private var currentState: TypoCorrectionTestState = .introduction
     
-    func handleTypoCorrectionComplete(result: TypoCorrectionResult)
-    {
-        vm.currentSentence += 1;
-        if(!vm.isWarmup)
-        {
-            TestManager.shared.addTypoCorrectionResult(result: result)
-            if result.Flagged {
-                // result was flagged, add another test to make up for it
-                vm.additionalCorrections += 1
+    func buildTestViewModel(id: Int, onCompletion: @escaping () -> Void) -> TypoCorrectionViewModel {
+        return TapFixTools.buildTypoCorrectionViewModel(id: id, typoSentence: vm.getSentence(id), correctionMethod: vm.correctionMethod, correctionType: vm.correctionType) { result in
+            // Update test progress and store result
+            vm.currentSentence += 1
+            if !vm.isWarmup {
+                TestManager.shared.addTypoCorrectionResult(result: result)
+                debugPrint(result.Flagged.intValue)
+                vm.additionalCorrections += result.Flagged.intValue
             }
+            // Do any additional actions (see ViewBuilder below)
+            onCompletion()
         }
-        navigationPath.append(vm.currentSentence)
     }
     
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            VStack {
-                Text("Typo Correction " + (vm.isWarmup ? "Warmup" : "Test"))
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.top)
-                List {
+        VStack {
+            if case .test(let testNumber) = currentState {
+                ProgressView(value: Float(testNumber), total: Float(vm.totalCorrectionCount)) {
                     HStack {
-                        Text("Task: ")
-                            .fontWeight(.bold)
-                        switch(vm.correctionType)
-                        {
-                        case .Replace:
-                            Text("Correct typos in sentence.")
-                        case .Delete:
-                            Text("Delete extra characters.")
-                        case .Insert:
-                            Text("Insert missing characters.")
-                        case .Swap:
-                            Text("Correct swapped characters.")
+                        Text("Sentence \(testNumber) out of \(vm.correctionCount)")
+                        if vm.additionalCorrections > 0 {
+                            Text("(+\(vm.additionalCorrections))").fontWeight(.thin)
                         }
                     }
-                    HStack {
-                        Text("Method: ")
-                            .fontWeight(.bold)
-                        switch(vm.correctionMethod)
-                        {
-                        case .SpacebarSwipe:
-                            Text("Swiping on space bar.")
-                        case .TextFieldLongPress:
-                            Text("Long press on text field.")
-                        case .TapFix:
-                            Text("Proposed TapFix method.")
-                        }
-                    }
-                    Text("In the following screens, you'll be shown correction tasks of the following layout:")
-                    VStack(alignment: .center) {
-                        let example = vm.sentences.last!
-                        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: example, correctionMethod: TypoCorrectionMethod.SpacebarSwipe, correctionType: TypoCorrectionType.Replace, completionHandler: {_ in }, preview: true)
-                        TypoCorrectionView(vm: viewModel)
-                    }
-                    Text("Your task is to correct the mistake in the given sentence using ")+Text("only").underline()+Text(" this method:")
-                    Text(correctionMethodExplanations[vm.correctionMethod]! +
-                         (vm.correctionMethod == TypoCorrectionMethod.TapFix ? " " + tapFixMethodExplanations[vm.correctionType]! : ""))
-                        .italic()
-                    Text("Do this as fast and accurately as possible.")
-                    Text("Time measurement will start the moment you touch the text field. Press the button below to continue.")
                 }
                 .padding(.horizontal)
-                .listStyle(.plain)
-                Button("Start " + (vm.isWarmup ? "warm-up" : "testing") + "..") {
-                    navigationPath.append(vm.currentSentence)
+                .padding(.top)
+            }
+            
+            // Dynamic content based on state
+            contentForCurrentState()
+        }
+        .transition(.slide)
+        .animation(.easeInOut, value: currentState)
+    }
+    
+    @ViewBuilder
+    private func contentForCurrentState() -> some View {
+        switch currentState {
+        case .introduction:
+            TypoCorrectionTestIntroductionView(warmup: vm.isWarmup, correctionType: vm.correctionType, correctionMethod: vm.correctionMethod)
+            Button("Start " + (vm.isWarmup ? "warm-up" : "testing") + "..") {
+                currentState = .test(1)
+            }
+            .buttonStyle(.bordered)
+            
+        case .test(let testNumber):
+            let testVm = buildTestViewModel(id: testNumber) {
+                if testNumber < vm.totalCorrectionCount {
+                    currentState = .test(testNumber + 1)
+                } else {
+                    currentState = .done
+                }
+            }
+            TypoCorrectionView(vm: testVm)
+            
+        case .done:
+            VStack {
+                Spacer()
+                Text("Done!").font(.title).padding()
+                Text("The typo-correction " + (vm.isWarmup ? "warm-up" : "test") + " is now complete.")
+                Button("Continue") {
+                    vm.completionHandler()
                 }
                 .buttonStyle(.bordered)
-            }
-            .navigationDestination(for: Int.self) { i in
-                VStack {
-                    let totalCorrections = (vm.correctionCount + vm.additionalCorrections)
-                    let additionalCorrectionsStr = vm.additionalCorrections > 0 ? " (+\(vm.additionalCorrections))" : ""
-                    if(i < totalCorrections)
-                    {
-                        ProgressView(value: Double(i) / Double(totalCorrections)) {
-                            Text("Sentence \(i+1) out of \(vm.correctionCount)\(additionalCorrectionsStr)")
-                        }
-                        .padding(.horizontal)
-                        .padding(.top)
-                        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: i, typoSentence: vm.sentences[i], correctionMethod: vm.correctionMethod, correctionType: vm.correctionType, completionHandler: handleTypoCorrectionComplete)
-                        TypoCorrectionView(vm: viewModel)
-                            .navigationBarBackButtonHidden(true)
-                    }
-                    else
-                    {
-                        VStack {
-                            Spacer()
-                            Text("Done!")
-                                .font(.title)
-                                .padding()
-                            Text("The typo-correction " + (vm.isWarmup ? "warm-up" : "test") + " is now complete.")
-                            Button("Continue") {
-                                vm.completionHandler()
-                                navigationPath = NavigationPath()
-                            }
-                            .buttonStyle(.bordered)
-                            Spacer()
-                        }
-                        .navigationBarBackButtonHidden(true)
-                    }
-                }
+                Spacer()
             }
         }
     }

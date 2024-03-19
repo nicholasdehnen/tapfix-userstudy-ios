@@ -62,6 +62,10 @@ class TestManager : ObservableObject {
     @Published var State: TestManagerState = .Pending // always starts in SetupPending state
     @Published var StatusMessage: String = "Setup pending.."
     
+    enum TestManagerError: Error {
+        case invalidState(String)
+        case runtimeError(String)
+    }
     
     static let shared = TestManager()
     private init()
@@ -133,44 +137,45 @@ class TestManager : ObservableObject {
         return "participant-\(self.ParticipantId)_on-\(formattedDate)"
     }
     
-    func addTypingWarmupResult(result: TypingWarmupResult)
+    private func writeCsvData(_ data: Codable, to path: URL?, with encoder: CSVEncoder, from source: String = #function) -> Bool
     {
         if self.State != .Ready {
-            logger.warnMessage("Unexpected state (\(self.State.rawValue)), writing typing warmup result data is likely to fail!")
+            logger.warnMessage("Unexpected state (\(self.State.rawValue)), writing attempt is likely to fail!")
         }
         
+        do {
+            guard let path = path else {
+                throw TestManagerError.runtimeError("Cannot write to nil path!")
+            }
+            let csvData = try encoder.encode(data)
+            try csvData.write(to: path)
+        } catch let error {
+            logger.errorMessage("Error writing csv data for \(source): \(error.localizedDescription)")
+            return false
+        }
+        return true
+    }
+    
+    func addTypingWarmupResult(result: TypingWarmupResult)
+    {
         // add to testdata
         testData.TypingWarmupResults.append(result)
         
         // write to file
-        do {
-            let warmupDataCsv = try warmupCsvEncoder.encode(testData.TypingWarmupResults)
-            try warmupDataCsv.write(to: warmupResultsFile!)
-        } catch let error {
-            logger.errorMessage("Error writing warmup results data csv file: \(error.localizedDescription)")
+        if writeCsvData(testData.TypingWarmupResults, to: warmupResultsFile, with: warmupCsvEncoder) {
+            logger.debugMessage("Added TypingWarmupResult to testData and updated results file.")
         }
-        
-        logger.debugMessage("Added TypingWarmupResult to testData and updated results file.")
     }
     
     func addTypoCorrectionResult(result: TypoCorrectionResult)
     {
-        if self.State != .Ready {
-            logger.warnMessage("Unexpected state (\(self.State.rawValue)), writing typing test result data is likely to fail!")
-        }
-        
         // add to testdata
         testData.CorrectionResults.append(result)
         
         // write to file
-        do {
-            let testDataCsv = try testCsvEncoder.encode(testData.CorrectionResults)
-            try testDataCsv.write(to: testResultsFile!)
-        } catch let error {
-            logger.errorMessage("Error writing test result data csv file: \(error.localizedDescription)")
+        if writeCsvData(testData.CorrectionResults, to: testResultsFile, with: testCsvEncoder) {
+            logger.debugMessage("Added TypoCorrectionResult to testData and updated results file.")
         }
-        
-        logger.debugMessage("Added TypoCorrectionResult to testData and updated results file.")
     }
     
     

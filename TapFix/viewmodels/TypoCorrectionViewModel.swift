@@ -191,6 +191,9 @@ class TypoCorrectionViewModel : ObservableObject
         if textField == self.textField {
             return false // do not update, we already have this
         }
+        else if self.preview {
+            return false // do not do anything in preview mode
+        }
         
         // Log TextField change
         logger.debugMessage {

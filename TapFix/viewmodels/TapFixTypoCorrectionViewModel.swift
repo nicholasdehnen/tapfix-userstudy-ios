@@ -117,6 +117,9 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
             logger.debugMessage("\(#function): methodActive = \(self.methodActive)")
         }
         else {
+            // soft reset: user tried correcting wrong word
+            beganEditing = self.refDate
+            beganSelecting = self.refDate
             notifyUser(message: "This word does not need correction.")
         }
     }

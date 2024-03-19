@@ -15,10 +15,10 @@ struct TypoCorrectionView: View {
     @State private var timerCountUp = 0
     
     // Timer to force user to read sentence and understand needed correction
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
     
     var body: some View {
-        
         VStack {
             if(!vm.preview)
             {
@@ -27,22 +27,23 @@ struct TypoCorrectionView: View {
             Text("Correct the following sentence:")
                 .font(.headline)
                 .padding(.bottom, 3.0)
-            HStack(alignment: .top) {
-                Text(vm.typoSentence.prefix)
-                VStack {
-                    Text(vm.typoSentence.typo)
-                        .foregroundColor(Color.red)
-                        .underline()
-                    Image(systemName: "arrow.down")
-                }
-                Text(vm.typoSentence.suffix)
-            }
-            HStack(alignment: .top) {
-                Text(vm.typoSentence.prefix)
-                Text(vm.typoSentence.correction)
-                    .foregroundColor(Color.green)
-                Text(vm.typoSentence.suffix)
-            }
+            //HStack(alignment: .top) {
+            //    Text(vm.typoSentence.prefix)
+            //    VStack {
+            //        Text(vm.typoSentence.typo)
+            //            .foregroundColor(Color.red)
+            //            .underline()
+            //        Image(systemName: "arrow.down")
+            //    }
+            //    Text(vm.typoSentence.suffix)
+            //}
+            //HStack(alignment: .top) {
+            //    Text(vm.typoSentence.prefix)
+            //    Text(vm.typoSentence.correction)
+            //        .foregroundColor(Color.green)
+            //    Text(vm.typoSentence.suffix)
+            //}
+            TypoVisualizationView(sentence: vm.typoSentence, correctionType: vm.correctionType, detailed: true)
             
             UIKitTextField(
                 config: .init {PaddedTextFieldWithTouchCallbacks()}
@@ -116,8 +117,11 @@ struct TypoCorrectionView: View {
         .overlay (
             HStack {
                 Spacer()
-                if !vm.preview && !vm.testFlagged && vm.finishedEditing.isReferenceDate {
-                    Button(action: {vm.flag(reason: "User flagged in TypoCorrectionView", userFriendlyReason: "You manually flagged this test.")}){
+                if !vm.preview && !vm.testFlagged && !vm.methodActive && vm.finishedEditing.isReferenceDate {
+                    Button(action: {
+                        DispatchQueue.main.async { // invoke async so we dont make changes from view thread
+                            vm.flag(reason: "User flagged in TypoCorrectionView", userFriendlyReason: "You manually flagged this test.")
+                        }}) {
                         Image(systemName: "questionmark.circle")
                             .foregroundColor(.yellow)
                             .font(.system(size: 32))
@@ -148,10 +152,11 @@ struct TypoCorrectionView: View {
                     }
                     .onAppear {
                         // Hide the toast after a <duration> seconds
-                        DispatchQueue.main.asyncAfter(deadline: .now() + vm.notificationToastDuration) {
-                            vm.showNotificationToast = false
-                            vm.notificationToastMessage = "No message."
-                        }
+                        // TODO: Rmoeve double hide
+                        //DispatchQueue.main.asyncAfter(deadline: .now() + vm.notificationToastDuration) {
+                        //    vm.showNotificationToast = false
+                        //    vm.notificationToastMessage = "No message."
+                        //}
                     }
                 }
                 else {
@@ -193,7 +198,7 @@ struct TypoCorrectionView: View {
 struct TypoCorrectionView_Previews: PreviewProvider {
     static var previews: some View {
         //let typoSentence = TypoSentence(Prefix: "this is", Typo: "iust", Correction: "just", Suffix: "a preview", Full: "this is iust a preview", FullCorrect: "this is just a preview")
-        let correctionType = TypoCorrectionType.Insert;
+        let correctionType = TypoCorrectionType.Swap;
         let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
         let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: correctionType, completionHandler: {_ in })

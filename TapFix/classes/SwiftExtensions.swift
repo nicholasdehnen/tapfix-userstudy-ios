@@ -165,3 +165,19 @@ extension Double {
         return abs(self - value) <= delta
     }
 }
+
+// Convert Bool to Int. Wild that this is not part of the language
+extension Bool {
+    var intValue: Int {
+        return self ? 1 : 0
+    }
+}
+
+// https://stackoverflow.com/a/64455539
+extension String {
+    func size(with font: UIFont) -> CGSize
+    {
+        let fontAttributes = [NSAttributedString.Key.font: font]
+        return self.size(withAttributes: fontAttributes)
+    }
+}

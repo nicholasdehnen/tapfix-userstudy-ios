@@ -4,7 +4,6 @@
 //
 //  Created by Nicholas Dehnen on 2022-12-11.
 //
-
 import Foundation
 
 // Taken partially from https://stackoverflow.com/a/38215613
