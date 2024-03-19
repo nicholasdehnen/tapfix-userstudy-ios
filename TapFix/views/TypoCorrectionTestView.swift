@@ -15,12 +15,14 @@ struct TypoCorrectionTestView: View {
     @State private var currentTestVmId: UUID = UUID()
     @State private var currentTestVm: TypoCorrectionViewModel?
     
+    private let moodEnhancers = ["You got this!", "Almost done!", "Not too long to go..", "We're getting there..", "Wow, that was fast!", "Thank you for participating :-)"]
+    
     enum TypoCorrectionTestState: Equatable {
         case introduction
         case test(Int)
         case done
     }
-    @State private var currentState: TypoCorrectionTestState = .introduction
+    @State var currentState: TypoCorrectionTestState = .introduction
     
     func buildTestViewModel(id: Int, onCompletion: @escaping () -> Void) -> TypoCorrectionViewModel {
         return TapFixTools.buildTypoCorrectionViewModel(id: id, typoSentence: vm.getSentence(id), correctionMethod: vm.correctionMethod, correctionType: vm.correctionType) { result in
@@ -61,11 +63,34 @@ struct TypoCorrectionTestView: View {
     private func contentForCurrentState() -> some View {
         switch currentState {
         case .introduction:
-            TypoCorrectionTestIntroductionView(warmup: vm.isWarmup, correctionType: vm.correctionType, correctionMethod: vm.correctionMethod)
-            Button("Start " + (vm.isWarmup ? "warm-up" : "testing") + "..") {
-                currentState = .test(1)
+            VStack(alignment: .leading) {
+                ProgressView(value: Float(vm.trialNumber), total: Float(vm.totalTrials)) {
+                    HStack {
+                        Text("\(vm.totalTrials-vm.trialNumber) trials remaining..")
+                            .fontWeight(.thin)
+                            .font(.footnote)
+                        if vm.trialNumber > 0 {
+                            Spacer()
+                            Text(moodEnhancers.randomElement()!)
+                            .fontWeight(.thin)
+                            .font(.footnote)
+                        }
+                    }
+                    
+                }
+                .padding(.horizontal)
+            
+                TypoCorrectionTestIntroductionView(warmup: vm.isWarmup, correctionType: vm.correctionType, correctionMethod: vm.correctionMethod)
+                
+                HStack(alignment: .center){
+                    Spacer()
+                    Button("Start " + (vm.isWarmup ? "warm-up" : "testing") + "..") {
+                        currentState = .test(1)
+                    }
+                    .buttonStyle(.bordered)
+                    Spacer()
+                }
             }
-            .buttonStyle(.bordered)
             
         case .test(let testNumber):
             let testVm = buildTestViewModel(id: testNumber) {

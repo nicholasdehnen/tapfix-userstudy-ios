@@ -18,7 +18,7 @@ struct MainView: View {
     @State private var typoCorrectionViewModel: TypoCorrectionViewModel?
     
     #if DEBUG
-    let isDebug = true
+    let isDebug = false // true
     let types: [TypoCorrectionType] = [.Delete, .Replace, .Insert, .Swap]
     let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
     @State var methodCounter = 0
@@ -93,8 +93,7 @@ struct MainView: View {
                         if(currentTest == index)
                         {
                             let testCase = testOrder[index]
-                            let viewModel = TypoCorrectionTestViewModel(correctionMethod: testCase.method, correctionType: testCase.type,
-                                                                        isWarmup: testCase.isWarmup, onCompletion: {
+                            let viewModel = TypoCorrectionTestViewModel(correctionMethod: testCase.method, correctionType: testCase.type, isWarmup: testCase.isWarmup, trialNumber: index, totalTrials: testOrder.count, onCompletion: {
                                     currentTest += 1
                                     if(currentTest == testOrder.count)
                                     {
