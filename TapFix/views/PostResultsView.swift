@@ -30,7 +30,7 @@ struct PostResultsView: View {
             if(!vm.uploadComplete && !vm.uploadError) {
                 ProgressView()
                     .padding()
-                Text("Your results are being uploaded, please wait..")
+                Text("Your results are being saved, please wait..")
                     .padding(.bottom, 75.0)
             }
             else if(vm.uploadError)
@@ -54,14 +54,17 @@ struct PostResultsView: View {
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(Color.green)
                     .padding(.bottom, 5.0)
-                Text("Your results have been uploaded successfully, you may close the app now.")
+                Text("Your results have been saved successfully, you may close the app now.")
                     .padding(.bottom, 75.0)
                     .padding(.horizontal)
                     .multilineTextAlignment(.center)
             }
         }
         .onAppear {
-            vm.startUpload()
+            //vm.startUpload()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { // invoke async so we dont make changes from view thread
+                vm.uploadComplete = true
+            }
         }
     }
 }
