@@ -29,7 +29,7 @@ class SentenceManager {
         }
     }
     
-    func getSentences(shuffle: Bool = false, randomSeed: UInt64 = 0, maxSentenceLength: Int = 40) -> [String] {
+    func getSentences(shuffle: Bool = false, randomSeed: UInt64 = 0, maxSentenceLength: Int = 38) -> [String] {
         var sentences_ = sentences.filter {$0.count <= maxSentenceLength}
         
         if(shuffle) {

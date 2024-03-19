@@ -14,8 +14,8 @@
             filePath = "TapFix/viewmodels/TypoCorrectionViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "111"
-            endingLineNumber = "111"
+            startingLineNumber = "113"
+            endingLineNumber = "113"
             landmarkName = "completeTask()"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "TapFix/viewmodels/TypoCorrectionViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "180"
-            endingLineNumber = "180"
+            startingLineNumber = "181"
+            endingLineNumber = "181"
             landmarkName = "finish(at:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -128,8 +128,8 @@
             filePath = "TapFix/viewmodels/TypoCorrectionViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "137"
-            endingLineNumber = "137"
+            startingLineNumber = "139"
+            endingLineNumber = "139"
             landmarkName = "completeTask()"
             landmarkType = "7">
          </BreakpointContent>
@@ -179,6 +179,22 @@
             startingLineNumber = "68"
             endingLineNumber = "68"
             landmarkName = "buildTypoCorrectionViewModel(id:typoSentence:correctionMethod:correctionType:completionHandler:preview:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E10C1DF8-971D-449F-8056-2935728373E4"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TapFix/viewmodels/TypoCorrectionViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "145"
+            endingLineNumber = "145"
+            landmarkName = "shouldReturn(textField:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

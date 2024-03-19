@@ -11,7 +11,7 @@ import Willow
 
 struct TypoCorrectionView: View {
     
-    @ObservedObject var vm: TypoCorrectionViewModel;
+    @ObservedObject var vm: TypoCorrectionViewModel
     @State private var timerCountUp = 0
     
     // Timer to force user to read sentence and understand needed correction
@@ -20,30 +20,10 @@ struct TypoCorrectionView: View {
     
     var body: some View {
         VStack {
-            if(!vm.preview)
-            {
-                Spacer()
-            }
             Text("Correct the following sentence:")
                 .font(.headline)
                 .padding(.bottom, 3.0)
-            //HStack(alignment: .top) {
-            //    Text(vm.typoSentence.prefix)
-            //    VStack {
-            //        Text(vm.typoSentence.typo)
-            //            .foregroundColor(Color.red)
-            //            .underline()
-            //        Image(systemName: "arrow.down")
-            //    }
-            //    Text(vm.typoSentence.suffix)
-            //}
-            //HStack(alignment: .top) {
-            //    Text(vm.typoSentence.prefix)
-            //    Text(vm.typoSentence.correction)
-            //        .foregroundColor(Color.green)
-            //    Text(vm.typoSentence.suffix)
-            //}
-            TypoVisualizationView(sentence: vm.typoSentence, correctionType: vm.correctionType, detailed: true)
+            TypoVisualizationView(vm: self.vm)
             
             UIKitTextField(
                 config: .init {PaddedTextFieldWithTouchCallbacks()}
@@ -69,7 +49,7 @@ struct TypoCorrectionView: View {
                     .shouldChangeCharacters(handler: vm.shouldChangeCharacters)
                     .onBeganEditing(handler: vm.onBeganEditing)
             )
-            .disabled(vm.preview || vm.methodActive ||
+            .disabled(!vm.editingAllowed || vm.preview || vm.methodActive ||
                       (vm.correctionMethod == .TapFix && vm.finishedEditing.timeIntervalSinceReferenceDate != 0))
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
@@ -81,10 +61,10 @@ struct TypoCorrectionView: View {
             if !vm.preview {
                 Button(action: vm.completeTask)
                 {
-                    Text(vm.editingAllowed ? "Proceed" : "Please wait.. \(vm.forcedWaitTime-timerCountUp)")
+                    Text(vm.editingAllowed ? "Proceed" : "Please wait.. \(vm.forcedWaitTime-vm.timerTime)")
                         .onReceive(timer) { _ in
-                            timerCountUp += 1
-                            if timerCountUp >= vm.forcedWaitTime {
+                            vm.timerTime += 1
+                            if vm.timerTime >= vm.forcedWaitTime {
                                 vm.editingAllowed = true
                                 timer.upstream.connect().cancel()
                             }
@@ -113,6 +93,7 @@ struct TypoCorrectionView: View {
             }
         }
         .padding()
+        .padding(.top, vm.preview ? 0 : 200)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .overlay (
             HStack {
@@ -150,14 +131,6 @@ struct TypoCorrectionView: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                             .animation(.easeInOut, value: vm.showNotificationToast)
                     }
-                    .onAppear {
-                        // Hide the toast after a <duration> seconds
-                        // TODO: Rmoeve double hide
-                        //DispatchQueue.main.asyncAfter(deadline: .now() + vm.notificationToastDuration) {
-                        //    vm.showNotificationToast = false
-                        //    vm.notificationToastMessage = "No message."
-                        //}
-                    }
                 }
                 else {
                     EmptyView()
@@ -191,7 +164,7 @@ struct TypoCorrectionView: View {
             .background(Color.yellow.opacity(0.8))
             .foregroundColor(.white)
             .cornerRadius(8)
-            .padding(.bottom, 50) // Adjust based on your UI needs
+            .padding(.bottom, 50)
     }
 }
 

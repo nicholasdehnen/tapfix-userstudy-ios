@@ -28,7 +28,6 @@ struct TypoCorrectionTestView: View {
             vm.currentSentence += 1
             if !vm.isWarmup {
                 TestManager.shared.addTypoCorrectionResult(result: result)
-                debugPrint(result.Flagged.intValue)
                 vm.additionalCorrections += result.Flagged.intValue
             }
             // Do any additional actions (see ViewBuilder below)

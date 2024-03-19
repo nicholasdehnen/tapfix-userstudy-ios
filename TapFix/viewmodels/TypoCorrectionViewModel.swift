@@ -12,7 +12,7 @@ import Willow
 
 class TypoCorrectionViewModel : ObservableObject
 {
-    @Published var textFieldIsFocused: Bool // TODO: Publishes changes in view update
+    @Published var textFieldIsFocused: Bool
     @Published var typoSentence: TypoSentenceProtocol
     @Published var userText: String
     
@@ -29,6 +29,7 @@ class TypoCorrectionViewModel : ObservableObject
     @Published var testFinished: Bool
     
     @Published var forcedWaitTime: Int
+    @Published var timerTime: Int
     @Published var editingAllowed: Bool
     
     @Published var showNotificationToast: Bool
@@ -80,6 +81,7 @@ class TypoCorrectionViewModel : ObservableObject
         self.testFlagReason = "Test not flagged."
         
         self.forcedWaitTime = TestManager.shared.UseForcedWaitTime ? (TestManager.shared.WaitTimesForCorrectionTypes[correctionType] ?? 0) : 0
+        self.timerTime = 0 // always starts on 0
         self.editingAllowed = !TestManager.shared.UseForcedWaitTime // true if not using forced wait time, otherwise set to true by timer later
         
         self.showNotificationToast = false
@@ -167,7 +169,6 @@ class TypoCorrectionViewModel : ObservableObject
     func flag(reason: String = "", userFriendlyReason: String? = nil) {
         logger.warnMessage("Test flagged.\(reason.isEmpty ? "" : " Reason: " + reason)")
         self.testFlagReason = userFriendlyReason != nil ? userFriendlyReason! : reason
-        self.textFieldIsFocused = false
         self.testFlagged = true
         finish()
     }
@@ -182,8 +183,16 @@ class TypoCorrectionViewModel : ObservableObject
         self.finishedInserting.updateIfReferenceDate(with: now, logWith: logger, logAs: "finishedInserting")
         
         // mark test as finished and disable method (eg. tapfix)
+        self.textFieldIsFocused = false
         self.testFinished = true
         self.methodActive = false
+        
+        // let go of textfield
+        if let tf = textField as? PaddedTextFieldWithTouchCallbacks {
+            tf.removeGestureRecognizer(tapGesture!)
+            tf.touchesBeganHandler = nil
+            self.textField = nil
+        }
     }
     
     @discardableResult

@@ -41,6 +41,12 @@ struct MainView: View {
     }
     #endif
     
+    private func filterTestOrder() {
+        testOrder = TestManager.shared.generateTestOrder()
+        testOrder = testOrder.filter { $0.isWarmup == false && TestManager.shared.SkipWarmups
+            || !TestManager.shared.SkipWarmups } // skip warmups depending on setting
+    }
+    
     func updateCorrectionVmWithTransition(with newVM: TypoCorrectionViewModel) {
         withAnimation {
             self.typoCorrectionVmId = UUID()
@@ -72,8 +78,7 @@ struct MainView: View {
                         .environmentObject(viewController)
                         .transition(.slide)
                         .onAppear {
-                            // these have already been generated at this point, we're just getting them here
-                            testOrder = TestManager.shared.generateTestOrder() // no idea why this doesnt complain about updates from view thread, maybe cause its not our view
+                            filterTestOrder() // no idea why this doesnt complain about updates from view thread, maybe cause its not our view
                         }
                 case 2:
                     TypingWarmupView()
@@ -86,8 +91,8 @@ struct MainView: View {
                         if(currentTest == index)
                         {
                             let testCase = testOrder[index]
-                            let viewModel = TypoCorrectionTestViewModel(correctionMethod: testCase.method, correctionType: testCase
-                                .type, isWarmup: testCase.isWarmup, onCompletion: {
+                            let viewModel = TypoCorrectionTestViewModel(correctionMethod: testCase.method, correctionType: testCase.type,
+                                                                        isWarmup: testCase.isWarmup, onCompletion: {
                                     currentTest += 1
                                     if(currentTest == testOrder.count)
                                     {
