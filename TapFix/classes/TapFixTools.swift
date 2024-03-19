@@ -70,8 +70,6 @@ class TapFixTools
             return TapFixTypoCorrectionViewModel(id: id, typoSentence: typoSentence, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
         case .SpacebarSwipe, .TextFieldLongPress:
             return BaselineTypoCorrectionViewModel(id: id, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
-        default:
-            return TypoCorrectionViewModel(id: id, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType, completionHandler: completionHandler, preview: preview)
         }
     }
     

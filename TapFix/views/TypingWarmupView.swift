@@ -19,7 +19,7 @@ struct TypingWarmupView: View {
     
     @State var startDate = Date(timeIntervalSinceReferenceDate: 0)
     
-    func onTextFieldChange(_: String) {
+    func onTextFieldChange() {
         // record time
         if(startDate.timeIntervalSinceReferenceDate == 0)
         {
@@ -123,7 +123,7 @@ struct TypingWarmupView: View {
                     .textFieldStyle(.roundedBorder)
                     .multilineTextAlignment(.center)
                     .padding()
-                    .onChange(of: self.text, perform: onTextFieldChange)
+                    .onChange(of: self.text, onTextFieldChange)
                     .onSubmit(onTextFieldSubmit)
                     .focused($textFieldFocused)
             }
