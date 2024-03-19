@@ -55,6 +55,13 @@ class TypoGenerator
         return String(characters)
     }
     
+    private func replaceCharacters(in string: String, at indices: [Int], with replacementCharacters: [Character]) -> String
+    {
+        var s = string
+        (0..<indices.count).forEach { s = replaceCharacter(in: s, at: indices[$0], with: replacementCharacters[$0])}
+        return s
+    }
+    
     private func getRandomCharacter(unlike originalCharacters: [Character]) -> Character
     {
         var replacementCharacter = characters.randomElement()!
@@ -69,6 +76,26 @@ class TypoGenerator
         return getRandomCharacter(unlike: [originalCharacter])
     }
     
+    private func getRandomCharacters(unlike originalCharacters: [Character]) -> [Character]
+    {
+        return originalCharacters.map { getRandomCharacter(unlike: $0) }
+    }
+    
+    private func getRandomIndices(for word: String, choose numberOfCharacters: Int) -> [Int]
+    {
+        var numberOfCharacters = numberOfCharacters
+        if numberOfCharacters >= word.count {
+            debugPrint("\(#function): Cannot generate \(numberOfCharacters) unique random indices for word \(word), more indices than letters requested!")
+            numberOfCharacters = 1
+        }
+        var uniqueIndices = Set<Int>()
+        while uniqueIndices.count < numberOfCharacters {
+            let randomIndex = Int.random(in: 0..<word.count)
+            uniqueIndices.insert(randomIndex)
+        }
+        return Array(uniqueIndices.sorted().reversed())
+    }
+    
     private func insertOrAppend(character: Character, in string: String, at index: Int) -> String
     {
         var string = string
@@ -81,41 +108,43 @@ class TypoGenerator
         return string
     }
     
-    private func generateReplaceTypeSentence(sentence: String, words: [String], wordIndex: Int) -> TypoSentence
+    private func generateReplaceTypeSentence(sentence: String, words: [String], wordIndex: Int, typoCount: Int = 1) -> TypoSentenceProtocol
     {
         let chosenWord = String(words[wordIndex]);
-        let characterIndex = Int.random(in: 0...max(0, chosenWord.count-1));
-        let replacementCharacter = getRandomCharacter(unlike: chosenWord[characterIndex])
-        let typoWord = replaceCharacter(in: chosenWord, at: characterIndex, with: replacementCharacter)
-        let (prefix, suffix, fullSentence, typoSentenceIndices) = assembleSentence(wordIndex: wordIndex, typoWord: typoWord, typoWordIndex: [characterIndex], words: words)
-        return TypoSentence(prefix: prefix, typo: typoWord, correction: chosenWord, suffix: suffix,
-                            full: fullSentence, fullCorrect: sentence,
-                            typoWordIndex: [characterIndex], typoSentenceIndex: typoSentenceIndices)
+        let characterIndices = getRandomIndices(for: chosenWord, choose: typoCount)
+        let replacementCharacters = getRandomCharacters(unlike: chosenWord[characterIndices])
+        let typoWord = replaceCharacters(in: chosenWord, at: characterIndices, with: replacementCharacters)
+        let (prefix, suffix, fullSentence, typoSentenceIndices) = assembleSentence(wordIndex: wordIndex, typoWord: typoWord, typoWordIndex: characterIndices, words: words)
+        return MultipleTypoSentence(prefix: prefix, typo: typoWord, correction: chosenWord, suffix: suffix,
+                            full: fullSentence, fullCorrect: sentence, typoCount: typoCount,
+                            typoWordIndex: characterIndices, typoSentenceIndex: typoSentenceIndices)
     }
     
-    private func generateDeleteTypeSentence(sentence: String, words: [String], wordIndex: Int) -> TypoSentence
+    private func generateDeleteTypeSentence(sentence: String, words: [String], wordIndex: Int, typoCount: Int = 1) -> TypoSentenceProtocol
     {
         let chosenWord = String(words[wordIndex]);
-        let typoIndex = Int.random(in: 0...chosenWord.count)
+        var typoIndices = getRandomIndices(for: chosenWord, choose: typoCount)
         
         // get characters around the place where typo would be inserted
-        var charactersAroundTypo: [Character] = []
-        if typoIndex > 0 {
-            charactersAroundTypo.append(chosenWord[typoIndex-1])
-        }
-        if typoIndex < chosenWord.count {
-            charactersAroundTypo.append(chosenWord[typoIndex])
+        var typoWord = chosenWord
+        
+        for i in 0..<typoIndices.count { // typoIndices is sorted in descending order
+            let typoIndex = typoIndices[i]
+            let charactersAroundTypo: [Character] = chosenWord.neighbours(of: typoIndex)
+            let typoCharacter = getRandomCharacter(unlike: charactersAroundTypo)
+            typoWord = insertOrAppend(character: typoCharacter, in: typoWord, at: typoIndex)
+            
+            // add offset to typoIndices to correct for characters going to be inserted in front of it
+            typoIndices[i] += (typoIndices.count - 1) - i
         }
         
-        let typoCharacter = getRandomCharacter(unlike: charactersAroundTypo)
-        let typoWord = insertOrAppend(character: typoCharacter, in: chosenWord, at: typoIndex)
-        let (prefix, suffix, fullSentence, typoSentenceIndices) = assembleSentence(wordIndex: wordIndex, typoWord: typoWord, typoWordIndex: [typoIndex], words: words)
+        let (prefix, suffix, fullSentence, typoSentenceIndices) = assembleSentence(wordIndex: wordIndex, typoWord: typoWord, typoWordIndex: typoIndices, words: words)
         return TypoSentence(prefix: prefix, typo: typoWord, correction: chosenWord, suffix: suffix,
                             full: fullSentence, fullCorrect: sentence,
-                            typoWordIndex: [typoIndex], typoSentenceIndex: typoSentenceIndices)
+                            typoWordIndex: typoIndices, typoSentenceIndex: typoSentenceIndices)
     }
     
-    private func generateInsertTypeSentence(sentence: String, words: [String], wordIndex: Int) -> InsertTypoSentence
+    private func generateInsertTypeSentence(sentence: String, words: [String], wordIndex: Int , typoCount: Int = 1) -> TypoSentenceProtocol
     {
         let chosenWord = String(words[wordIndex])
         var characters = Array(chosenWord)
@@ -129,7 +158,7 @@ class TypoGenerator
                                   typoWordIndex: [randomIndex], typoSentenceIndex: typoSentenceIndices, characterToInsert: removedCharacter)
     }
     
-    private func generateSwapTypeSentence(sentence: String, words: [String], wordIndex: Int, longDistance: Bool = false) -> TypoSentence
+    private func generateSwapTypeSentence(sentence: String, words: [String], wordIndex: Int, longDistance: Bool = false) -> TypoSentenceProtocol
     {
         let chosenWord = String(words[wordIndex])
         var wordCharacters = Array(chosenWord)
@@ -164,23 +193,27 @@ class TypoGenerator
         let components = sentence.components(separatedBy: chararacterSet)
         let words = components.filter { !$0.isEmpty }
         var wordIndex = Int.random(in: 0...words.count-1)
-        while(words[wordIndex].count <= 2) // do not select words of length 1 or 2
+        while(words[wordIndex].count <= 3) // do not select words of length 1 - 3
         {
             wordIndex = Int.random(in: 0...words.count-1)
         }
+        
+        //let randDbl = Double.random(in: 0.0...1.0)
+        //let typoCount = randDbl < 0.25 ? 2 : 1 // 25% chance of generating 2, 75% of generating 1
+        let typoCount = 1 // more would need massive logic changes in VMs
         
         index += 1
         
         switch(type)
         {
         case TypoCorrectionType.Replace:
-            return generateReplaceTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex)
+            return generateReplaceTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex, typoCount: typoCount)
         case TypoCorrectionType.Delete:
-            return generateDeleteTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex)
+            return generateDeleteTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex, typoCount: typoCount)
         case TypoCorrectionType.Insert:
-            return generateInsertTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex)
+            return generateInsertTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex, typoCount: typoCount)
         case TypoCorrectionType.Swap:
-            return generateSwapTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex)
+            return generateSwapTypeSentence(sentence: sentence, words: words, wordIndex: wordIndex) // typoCount ignored for Swap: Always returns 2 typos
         }
     }
     

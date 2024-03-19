@@ -15,6 +15,8 @@ protocol TypoSentenceProtocol {
     var full: String { get }
     var fullCorrect: String { get }
     
+    var typoCount: Int { get }
+    
     var typoWordIndex: [Int] { get }
     var typoSentenceIndex: [Int] { get }
 }
@@ -26,6 +28,8 @@ struct TypoSentence : TypoSentenceProtocol {
     let suffix: String;
     let full: String;
     let fullCorrect: String;
+    
+    let typoCount: Int = 1;
     
     let typoWordIndex: [Int];
     let typoSentenceIndex: [Int];
@@ -41,6 +45,8 @@ struct InsertTypoSentence : TypoSentenceProtocol {
     let full: String;
     let fullCorrect: String;
     
+    let typoCount: Int = 1;
+    
     let typoWordIndex: [Int];
     let typoSentenceIndex: [Int];
     
@@ -49,4 +55,20 @@ struct InsertTypoSentence : TypoSentenceProtocol {
     
     
     static let Empty: InsertTypoSentence = InsertTypoSentence(prefix: "", typo: "", correction: "", suffix: "", full: "", fullCorrect: "", typoWordIndex: [], typoSentenceIndex: [], characterToInsert: "?")
+}
+
+struct MultipleTypoSentence : TypoSentenceProtocol {
+    let prefix: String;
+    let typo: String;
+    let correction: String;
+    let suffix: String;
+    let full: String;
+    let fullCorrect: String;
+    
+    let typoCount: Int;
+    
+    let typoWordIndex: [Int];
+    let typoSentenceIndex: [Int];
+    
+    static let Empty: MultipleTypoSentence = MultipleTypoSentence(prefix: "", typo: "", correction: "", suffix: "", full: "", fullCorrect: "", typoCount: 0, typoWordIndex: [], typoSentenceIndex: [])
 }

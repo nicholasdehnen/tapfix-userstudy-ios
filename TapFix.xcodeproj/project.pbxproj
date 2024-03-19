@@ -34,6 +34,7 @@
 		017C1EDC2945A4EC00D6A417 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017C1EDB2945A4EC00D6A417 /* StringExtension.swift */; };
 		01A642032BA8D621000E544A /* TypoCorrectionTestIntroductionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A642022BA8D621000E544A /* TypoCorrectionTestIntroductionView.swift */; };
 		01A642052BA8EEA2000E544A /* TypoVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A642042BA8EEA2000E544A /* TypoVisualizationView.swift */; };
+		01A642072BA9D12C000E544A /* CorrectableString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A642062BA9D12C000E544A /* CorrectableString.swift */; };
 		01B8BC842BA0E4110041F80F /* CodableCSV in Frameworks */ = {isa = PBXBuildFile; productRef = 01B8BC832BA0E4110041F80F /* CodableCSV */; };
 		01B8BC862BA0E70C0041F80F /* BaselineTypoCorrectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B8BC852BA0E70C0041F80F /* BaselineTypoCorrectionViewModel.swift */; };
 		01B8BC8A2BA0EED70041F80F /* TypoCorrectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B8BC892BA0EED70041F80F /* TypoCorrectionViewModel.swift */; };
@@ -73,6 +74,7 @@
 		017C1EDB2945A4EC00D6A417 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		01A642022BA8D621000E544A /* TypoCorrectionTestIntroductionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionTestIntroductionView.swift; sourceTree = "<group>"; };
 		01A642042BA8EEA2000E544A /* TypoVisualizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoVisualizationView.swift; sourceTree = "<group>"; };
+		01A642062BA9D12C000E544A /* CorrectableString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectableString.swift; sourceTree = "<group>"; };
 		01B8BC852BA0E70C0041F80F /* BaselineTypoCorrectionViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaselineTypoCorrectionViewModel.swift; sourceTree = "<group>"; };
 		01B8BC892BA0EED70041F80F /* TypoCorrectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionViewModel.swift; sourceTree = "<group>"; };
 		01E3AA7C29463A0700EEDBBB /* TypoCorrectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypoCorrectionView.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				01E3AA8129467EB500EEDBBB /* SwiftExtensions.swift */,
 				014576132B97806E00D73DEA /* TapFixTools.swift */,
 				015A9A9C2B9BC02800AB6F32 /* Logging.swift */,
+				01A642062BA9D12C000E544A /* CorrectableString.swift */,
 			);
 			path = classes;
 			sourceTree = "<group>";
@@ -287,6 +290,7 @@
 				013803512945028600487F5A /* SentenceManager.swift in Sources */,
 				01A642052BA8EEA2000E544A /* TypoVisualizationView.swift in Sources */,
 				01E3AA8229467EB500EEDBBB /* SwiftExtensions.swift in Sources */,
+				01A642072BA9D12C000E544A /* CorrectableString.swift in Sources */,
 				01E4AF032947C42E0068FC33 /* TapFixViewModel.swift in Sources */,
 				0127E244294539CC001E0023 /* TypoCorrectionTestView.swift in Sources */,
 				01E3AA7D29463A0700EEDBBB /* TypoCorrectionView.swift in Sources */,
