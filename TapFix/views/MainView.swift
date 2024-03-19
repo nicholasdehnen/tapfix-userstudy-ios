@@ -18,17 +18,17 @@ struct MainView: View {
     @State private var typoCorrectionViewModel: TypoCorrectionViewModel?
     
     #if DEBUG
-    let isDebug = false
+    let isDebug = true
     let types: [TypoCorrectionType] = [.Delete, .Replace, .Insert, .Swap]
+    let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
     @State var methodCounter = 0
     private func generateAndDisplayNewTypo() {
-        let correctionMethod = TypoCorrectionMethod.TextFieldLongPress
+        let correctionMethod = TypoCorrectionMethod.TapFix
         let correctionType = types[methodCounter % types.count]
         methodCounter += 1
-        let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
         
-        let newViewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType) { [self] _ in
+        let newViewModel = TapFixTools.buildTypoCorrectionViewModel(id: methodCounter, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType) { [self] _ in
                 self.generateAndDisplayNewTypo() // call self on complete to generate new vm and view
         }
         
@@ -39,6 +39,8 @@ struct MainView: View {
             generateAndDisplayNewTypo()
         }
     }
+    #else
+    let isDebug = false
     #endif
     
     private func filterTestOrder() {

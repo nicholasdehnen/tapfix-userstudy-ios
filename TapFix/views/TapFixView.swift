@@ -53,7 +53,7 @@ struct TapFixView: View {
                                             
                                             // drag left/right -> swap
                                             // allow when method allowed and dragging left or right
-                                            else if vm.methodSwapAllowed && (dragDir == .left || dragDir == .right) {
+                                            else if vm.methodSwapAllowed && abs(value.translation.width) > 0 {
                                                 self.charProps[c.Id]?.drag = CGSize(width: value.translation.width, height: 0.0)
                                             }
                                             
@@ -71,7 +71,8 @@ struct TapFixView: View {
                                             let dragDir = TapFixTools.detectDirection(value: value)
                                             var dragTarget = -1
                                             
-                                            if vm.methodSwapAllowed && (dragDir == .left || dragDir == .right)
+                                            // use translation width for swap detection: more intuitive, allows diagonal drag
+                                            if vm.methodSwapAllowed && abs(value.translation.width) > 0
                                             {
                                                 dragTarget = TapFixTools.calculateTargetIndex(for: c.Id, with: value, dir: dragDir, characters: vm.tapFixCharacters, characterWidth: characterWidth, stackSpacing: stackSpacing)
                                             }

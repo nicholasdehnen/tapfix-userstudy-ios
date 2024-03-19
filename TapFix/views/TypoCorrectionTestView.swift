@@ -94,7 +94,7 @@ struct TypoCorrectionTestView: View {
 
 struct TypoCorrectionWarmup_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Insert, isWarmup: false)
+        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Swap, isWarmup: false)
         TypoCorrectionTestView(vm: viewModel)
     }
 }

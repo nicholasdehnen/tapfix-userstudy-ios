@@ -37,16 +37,87 @@ struct EmojiPrefixModifier: LogModifier {
     }
 }
 
+class FileWriter: LogWriter {
+    
+    private var fileHandle: FileHandle?
+    private let fileManager = FileManager.default
+    private let logFilePath: String
+
+    init?(logFileName: String? = nil) {
+        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        let logDirectory = "\(documentsDirectory)/Logs"
+
+        // Create Logs directory if it doesn't exist
+        if !fileManager.fileExists(atPath: logDirectory) {
+            do {
+                try fileManager.createDirectory(atPath: logDirectory, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("Failed to create log directory: \(error)")
+                return nil
+            }
+        }
+        
+        var logFileName = logFileName ?? ""
+        if logFileName.isEmpty {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd-MM-yyy_hh-mm"
+            let formattedDate = dateFormatter.string(from: Date.now)
+            logFileName = "log_\(formattedDate).txt"
+        }
+
+        self.logFilePath = "\(logDirectory)/\(logFileName)"
+
+        // Create log file if it doesn't exist
+        if !fileManager.fileExists(atPath: logFilePath) {
+            fileManager.createFile(atPath: logFilePath, contents: nil, attributes: nil)
+        }
+
+        // Open the file for writing
+        if let fileHandle = FileHandle(forWritingAtPath: logFilePath) {
+            self.fileHandle = fileHandle
+        } else {
+            print("Failed to open file handle for log file at path: \(logFilePath)")
+            return nil
+        }
+    }
+
+    deinit {
+        fileHandle?.closeFile()
+    }
+    
+    func writeMessage(_ message: any Willow.LogMessage, logLevel: Willow.LogLevel) {
+        let message = "\(message.name): \(message.attributes)"
+        self.writeMessage(message, logLevel: logLevel)
+    }
+    
+    public func writeMessage(_ message: String, logLevel: Willow.LogLevel, modifiers: [Willow.LogModifier]?) {
+        var message = message
+        modifiers?.forEach { message = $0.modifyMessage(message, with: logLevel) }
+        self.writeMessage(message, logLevel: logLevel)
+    }
+
+    public func writeMessage(_ message: String, logLevel: LogLevel) {
+        guard let fileHandle = fileHandle else { return }
+
+        if let data = "\(message)\n".data(using: .utf8) {
+            // Move to the end of the file to append the log message
+            fileHandle.seekToEndOfFile()
+            fileHandle.write(data)
+        }
+    }
+}
+
+
 func buildWillowLogger(name: String) -> Logger
 {
     #if DEBUG
-        return Logger(logLevels: [.all], writers: [ConsoleWriter(modifiers: [EmojiPrefixModifier(name: name)])])
+        return Logger(logLevels: [.all], writers: [FileWriter()!, ConsoleWriter(modifiers: [EmojiPrefixModifier(name: name)])])
     #else
         let osLogWriter = OSLogWriter(subsystem: "co.dehnen.tapfix", category: name)
-        let appLogLevels: LogLevel = [.event, .info, .warn, .error]
+        let appLogLevels: LogLevel = .all //[.event, .info, .warn, .error]
         let asynchronousExec: Logger.ExecutionMethod = .asynchronous(
             queue: DispatchQueue(label: "co.dehnen.tapfix", qos: .utility))
         
-        return Logger(logLevels: appLogLevels, writers: [osLogWriter], executionMethod: asynchronousExec)
+        return Logger(logLevels: appLogLevels, writers: [osLogWriter, FileWriter()!], executionMethod: asynchronousExec)
     #endif
 }
