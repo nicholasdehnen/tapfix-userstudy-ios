@@ -42,10 +42,24 @@ class FileWriter: LogWriter {
     private var fileHandle: FileHandle?
     private let fileManager = FileManager.default
     private let logFilePath: String
+    private static var sessionTimeStamp: String = ""
 
-    init?(logFileName: String? = nil) {
+    init?(for loggerName: String = "log", useSessionTimeStamp: Bool = true) {
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         let logDirectory = "\(documentsDirectory)/Logs"
+        
+        // Generate logFileName
+        var logFileName = loggerName
+        if useSessionTimeStamp && FileWriter.sessionTimeStamp.isEmpty {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd-MM-yyy_hh-mm"
+            let formattedDate = dateFormatter.string(from: Date.now)
+            FileWriter.sessionTimeStamp = formattedDate
+        }
+        if useSessionTimeStamp {
+            logFileName += "_\(FileWriter.sessionTimeStamp)"
+        }
+        logFileName += ".txt"
 
         // Create Logs directory if it doesn't exist
         if !fileManager.fileExists(atPath: logDirectory) {
@@ -55,14 +69,6 @@ class FileWriter: LogWriter {
                 print("Failed to create log directory: \(error)")
                 return nil
             }
-        }
-        
-        var logFileName = logFileName ?? ""
-        if logFileName.isEmpty {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd-MM-yyy_hh-mm"
-            let formattedDate = dateFormatter.string(from: Date.now)
-            logFileName = "log_\(formattedDate).txt"
         }
 
         self.logFilePath = "\(logDirectory)/\(logFileName)"
@@ -118,6 +124,6 @@ func buildWillowLogger(name: String) -> Logger
         let asynchronousExec: Logger.ExecutionMethod = .asynchronous(
             queue: DispatchQueue(label: "co.dehnen.tapfix", qos: .utility))
         
-        return Logger(logLevels: appLogLevels, writers: [osLogWriter, FileWriter()!], executionMethod: asynchronousExec)
+    return Logger(logLevels: appLogLevels, writers: [osLogWriter, FileWriter(for: name)!], executionMethod: asynchronousExec)
     #endif
 }

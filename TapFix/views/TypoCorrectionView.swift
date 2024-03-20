@@ -171,10 +171,11 @@ struct TypoCorrectionView: View {
 struct TypoCorrectionView_Previews: PreviewProvider {
     static var previews: some View {
         //let typoSentence = TypoSentence(Prefix: "this is", Typo: "iust", Correction: "just", Suffix: "a preview", Full: "this is iust a preview", FullCorrect: "this is just a preview")
-        let correctionType = TypoCorrectionType.Swap;
+        let correctionType = TypoCorrectionType.Swap
+        let correctionMethod = TypoCorrectionMethod.TapFix
         let typoGen = TypoGenerator(sentences: SentenceManager.shared.getSentences(shuffle: true))
         let typoSentence = typoGen.generateSentence(type: correctionType)
-        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: TypoCorrectionMethod.TapFix, correctionType: correctionType, completionHandler: {_ in })
+        let viewModel = TapFixTools.buildTypoCorrectionViewModel(id: 0, typoSentence: typoSentence, correctionMethod: correctionMethod, correctionType: correctionType, completionHandler: {_ in })
         TypoCorrectionView(vm: viewModel)
     }
 }

@@ -53,6 +53,13 @@ class PaddedTextFieldWithTouchCallbacks : PaddedTextField {
     var touchesMovedHandler : ((_ touches: [UITouch], _ locations : [CGPoint]) -> Void)? = nil
     var touchesEndedHandler : ((_ touches: [UITouch] ) -> Void)? = nil
     
+    private(set) var lastGestureRecognizerShouldBeginEvent: Date = Date.referenceDate
+    
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        lastGestureRecognizerShouldBeginEvent = Date.now
+        return true
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         touchesBeganHandler?(Array(touches))

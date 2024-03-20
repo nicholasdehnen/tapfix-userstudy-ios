@@ -31,7 +31,8 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
         case .Insert:
             // TapFix quirk: if Insert, positioningTime is counted from Insertion on
             // -> This is because order is inverted, character is first inserted, then moved to the correct place
-            superStats.positioningTime = finishedInserting.distance(to: finishedSelecting)
+            superStats.insertionTime = beganSelecting.distance(to: finishedInserting)
+            superStats.positioningTime = abs(finishedInserting.distance(to: finishedSelecting)) // abs due to floating point precision issuse when no positioning time (insert immediately fixes)
             superStats.correctionTime = finishedSelecting.distance(to: finishedEditing) // cascades to correctionTime
         case .Delete:
             superStats.insertionTime = 0
@@ -96,7 +97,7 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
         beganEditing.updateIfReferenceDate(logWith: logger, logAs: "beganEditing")
     }
     
-    override func onTripleTapDetected(word: String, range: ClosedRange<Int>)
+    override func onTripleTapDetected(word: String, range: ClosedRange<Int>, began: Date, ended: Date)
     {
         if !self.editingAllowed || self.testFinished {
             logger.debugMessage("\(#function): Editing not allowed\(self.testFinished ? " anymore" : " yet"), returning.")
@@ -106,9 +107,12 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
             return
         }
         
-        let now = Date.now
-        self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing") // maybe add onsingletap for this
-        self.beganSelecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganSelecting")
+        let gestureDuration = began.distance(to: ended) // sanity check: triple tap really shouldnt be taking any longer than 3s (and that would be very slow!)
+        if !began.isReferenceDate && gestureDuration < 3.0 {
+            self.beganEditing = began
+            logger.debugMessage("\(#function): Updating beganEditing with tripleTap began date, gesture duration: \(String(format: "%.4f", gestureDuration))s")
+        }
+        self.beganSelecting.updateIfReferenceDate(with: Date.now, logWith: logger, logAs: "beganSelecting")
         
         if word == typoSentence.typo {
             self.beganSelecting = Date.now
@@ -164,7 +168,7 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
         let insertTypoSentence = self.typoSentence as! InsertTypoSentence
         logger.debugMessage("\(#function): charInserted = \(charInserted), characterToInsert = \(insertTypoSentence.characterToInsert)")
         if charInserted == insertTypoSentence.characterToInsert {
-            self.finishedInserting = Date.now
+            self.finishedInserting.updateIfReferenceDate(logWith: logger, logAs: "finishedInserting")
             let newSelectionIndices = newText.indices(of: insertTypoSentence.characterToInsert)
             logger.debugMessage("\(#function): updating legalSelectionIndices (\(self.legalSelectionIndices) -> \(newSelectionIndices)), finishedInserting = \(self.finishedInserting)")
             self.legalSelectionIndices = newSelectionIndices
@@ -184,6 +188,14 @@ class TapFixTypoCorrectionViewModel : TypoCorrectionViewModel
     }
     
     func onTapFixCharacterTouched(character: String, offset: Int) {
+        // sanity check: make sure we dont reject or accept any touches too early (accidental quadruple-tap, etc.)
+        let guardTime = 0.1
+        if self.beganSelecting.distance(to: Date.now) < guardTime {
+            logger.debugMessage("\(#function): Ignoring touch on character \(character), within safe-guard time.")
+            return
+        }
+        
+        // check if correct touch
         let isOffsetCorrect = self.legalSelectionIndices.contains(offset)
         if(isOffsetCorrect && finishedSelecting.timeIntervalSinceReferenceDate == 0)
         {

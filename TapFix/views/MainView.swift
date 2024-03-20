@@ -9,6 +9,15 @@ import SwiftUI
 
 struct MainView: View {
     
+    enum UserStudyState: Equatable {
+        case setup
+        case introduction
+        case typingWarmup
+        case test(Int)
+        case done
+        case error
+    }
+    
     @State var testNavigationPath = NavigationPath()
     @StateObject var viewController = ViewController();
     @State var testOrder: [TestOrderInformation] = []
@@ -83,9 +92,9 @@ struct MainView: View {
                             filterTestOrder() // no idea why this doesnt complain about updates from view thread, maybe cause its not our view
                         }
                 case 2:
-                    TypingWarmupView()
-                        .environmentObject(viewController)
-                        .transition(.slide)
+                    TypingWarmupView() {
+                        viewController.next()
+                    }.transition(.slide)
                     
                 case 3:
                     ForEach(testOrder.indices, id: \.self)

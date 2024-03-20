@@ -134,7 +134,8 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
     
     override func onChangedSelection(textField: PaddedTextField)
     {
-        logger.debugMessage("\(#function): textField.selectedTextRange = \(textField.selectedSwiftTextRange?.description ?? "<none>")")
+        let selectedRange = textField.selectedTextRange
+        logger.debugMessage("\(#function): textField.selectedTextRange = \(selectedRange?.description ?? "<none>")")
         
         // Do not allow editing when (a) test just started and forcedWaitTime still running or (b) test finished
         if(!self.editingAllowed || self.testFinished)
@@ -152,7 +153,7 @@ class BaselineTypoCorrectionViewModel : TypoCorrectionViewModel
         self.beganEditing.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganEditing")
         self.beganSelecting.updateIfReferenceDate(with: now, logWith: logger, logAs: "beganSelecting")
         
-        if let selectedRange = textField.selectedTextRange {
+        if let selectedRange = selectedRange {
             let cursorPosition = textField.offset(from: textField.beginningOfDocument, to: selectedRange.start)
             
             // Update finishedSelecting once user moves cursor to correct position

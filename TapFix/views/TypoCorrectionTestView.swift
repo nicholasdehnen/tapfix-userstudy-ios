@@ -8,21 +8,18 @@
 import SwiftUI
 
 struct TypoCorrectionTestView: View {
-    
-    @EnvironmentObject var viewController: ViewController;
-    @StateObject var vm: TypoCorrectionTestViewModel
-    
-    @State private var currentTestVmId: UUID = UUID()
-    @State private var currentTestVm: TypoCorrectionViewModel?
-    
-    private let moodEnhancers = ["You got this!", "Almost done!", "Not too long to go..", "We're getting there..", "Wow, that was fast!", "Thank you for participating :-)"]
-    
     enum TypoCorrectionTestState: Equatable {
         case introduction
         case test(Int)
         case done
     }
+    
     @State var currentState: TypoCorrectionTestState = .introduction
+    @StateObject var vm: TypoCorrectionTestViewModel
+    @State private var currentTestVmId: UUID = UUID()
+    @State private var currentTestVm: TypoCorrectionViewModel?
+    
+    private let motivationalProgressMessages = ["You got this!", "Almost done!", "Not too long to go..", "We're getting there..", "Wow, that was fast!", "Thank you for participating :-)"]
     
     func buildTestViewModel(id: Int, onCompletion: @escaping () -> Void) -> TypoCorrectionViewModel {
         return TapFixTools.buildTypoCorrectionViewModel(id: id, typoSentence: vm.getSentence(id), correctionMethod: vm.correctionMethod, correctionType: vm.correctionType) { result in
@@ -42,9 +39,14 @@ struct TypoCorrectionTestView: View {
             if case .test(let testNumber) = currentState {
                 ProgressView(value: Float(testNumber), total: Float(vm.totalCorrectionCount)) {
                     HStack {
-                        Text("Sentence \(testNumber) out of \(vm.correctionCount)")
+                        Text("Trial \(testNumber) out of \(vm.correctionCount)")
+                            .fontWeight(.thin)
+                            .font(.footnote)
                         if vm.additionalCorrections > 0 {
-                            Text("(+\(vm.additionalCorrections))").fontWeight(.thin)
+                            Text("(+\(vm.additionalCorrections))")
+                                .fontWeight(.thin)
+                                .font(.footnote)
+                                .foregroundStyle(Color(.orange))
                         }
                     }
                 }
@@ -66,18 +68,18 @@ struct TypoCorrectionTestView: View {
             VStack(alignment: .leading) {
                 ProgressView(value: Float(vm.trialNumber), total: Float(vm.totalTrials)) {
                     HStack {
-                        Text("\(vm.totalTrials-vm.trialNumber) trials remaining..")
+                        Text("\(vm.totalTrials-vm.trialNumber) tests remaining..")
                             .fontWeight(.thin)
                             .font(.footnote)
                         if vm.trialNumber > 0 {
                             Spacer()
-                            Text(moodEnhancers.randomElement()!)
+                            Text(motivationalProgressMessages.randomElement()!)
                             .fontWeight(.thin)
                             .font(.footnote)
                         }
                     }
-                    
                 }
+                .progressViewStyle(.linear)
                 .padding(.horizontal)
             
                 TypoCorrectionTestIntroductionView(warmup: vm.isWarmup, correctionType: vm.correctionType, correctionMethod: vm.correctionMethod)
@@ -119,7 +121,7 @@ struct TypoCorrectionTestView: View {
 
 struct TypoCorrectionWarmup_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Swap, isWarmup: false)
+        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Swap, isWarmup: false, trialNumber: 5, totalTrials: 18)
         TypoCorrectionTestView(vm: viewModel)
     }
 }
