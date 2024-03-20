@@ -23,12 +23,16 @@ struct TypoCorrectionTestView: View {
     
     func buildTestViewModel(id: Int, onCompletion: @escaping () -> Void) -> TypoCorrectionViewModel {
         return TapFixTools.buildTypoCorrectionViewModel(id: id, typoSentence: vm.getSentence(id), correctionMethod: vm.correctionMethod, correctionType: vm.correctionType) { result in
+            
             // Update test progress and store result
             vm.currentSentence += 1
             if !vm.isWarmup {
                 TestManager.shared.addTypoCorrectionResult(result: result)
-                vm.additionalCorrections += result.Flagged.intValue
             }
+            
+            // Add additional correction if this was flagged
+            vm.additionalCorrections += result.Flagged.intValue
+            
             // Do any additional actions (see ViewBuilder below)
             onCompletion()
         }

@@ -58,8 +58,6 @@ struct TypingWarmupView: View {
         text = ""
                 
         // advance
-        debugPrint(sentenceNo)
-        debugPrint(testCount )
         if sentenceNo < testCount {
             sentenceNo += 1
             state = .warmup(sentenceNo)
@@ -71,18 +69,22 @@ struct TypingWarmupView: View {
     }
     
     var body: some View {
-        VStack {
-            Spacer()
-            switch state {
-            case .introduction:
-                warmupIntro()
-            case .warmup(let num):
-                warmupTypingTest(sentence: sentences[num])
-            case .done:
-                warmupThankYou()
+        ZStack {
+            Color.clear
+            VStack {
+                Spacer()
+                switch state {
+                case .introduction:
+                    warmupIntro()
+                case .warmup(let num):
+                    warmupTypingTest(sentence: sentences[num])
+                case .done:
+                    warmupThankYou()
+                }
+                Spacer()
             }
-            Spacer()
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .onAppear {
             sentences = SentenceManager.shared.getSentences()
             testCount = TestManager.shared.TypingTestLength
@@ -102,8 +104,6 @@ struct TypingWarmupView: View {
         }
         .transition(.slide)
         .animation(.easeInOut, value: state)
-        .frame(maxWidth:.infinity, maxHeight:.infinity, alignment:.topLeading)
-        .padding()
     }
     
     

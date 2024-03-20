@@ -17,8 +17,8 @@ struct TypoCorrectionTestIntroductionView: View {
     ]
     
     private let correctionMethodDescriptions: [TypoCorrectionMethod : String] = [
-        .SpacebarSwipe: "Swiping on space bar.",
-        .TextFieldLongPress: "Long press on text field.",
+        .SpacebarSwipe: "Hold & swipe on space bar.",
+        .TextFieldLongPress: "Use text lens (magnifier).",
         .TapFix: "Proposed TapFix method."
     ]
         
@@ -92,5 +92,5 @@ struct TypoCorrectionTestIntroductionView: View {
 }
 
 #Preview {
-    TypoCorrectionTestIntroductionView(warmup: false, correctionType: .Replace, correctionMethod: .TapFix)
+    TypoCorrectionTestIntroductionView(warmup: false, correctionType: .Replace, correctionMethod: .TextFieldLongPress)
 }
