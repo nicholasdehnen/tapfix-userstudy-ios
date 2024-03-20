@@ -50,8 +50,13 @@ struct TypoCorrectionTestView: View {
                             Text("(+\(vm.additionalCorrections))")
                                 .fontWeight(.thin)
                                 .font(.footnote)
-                                .foregroundStyle(Color(.orange))
+                                .foregroundStyle(.orange)
                         }
+                        Spacer()
+                        Text("\(vm.correctionMethod.description)-\(vm.correctionType)")
+                        .fontWeight(.thin)
+                        .font(.footnote)
+                        .foregroundStyle(.gray)
                     }
                 }
                 .padding(.horizontal)
@@ -125,7 +130,7 @@ struct TypoCorrectionTestView: View {
 
 struct TypoCorrectionWarmup_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TapFix, correctionType: TypoCorrectionType.Swap, isWarmup: false, trialNumber: 5, totalTrials: 18)
+        let viewModel = TypoCorrectionTestViewModel(correctionMethod: TypoCorrectionMethod.TextFieldLongPress, correctionType: TypoCorrectionType.Replace, isWarmup: false, trialNumber: 5, totalTrials: 18)
         TypoCorrectionTestView(vm: viewModel)
     }
 }
