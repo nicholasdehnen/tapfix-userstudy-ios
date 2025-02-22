@@ -8,7 +8,7 @@ This is a test application designed for a user study evaluating a unique typo co
 This repository contains the main application source code, as well as all supporting resources (images and other assets).
 
 #### TapFix/
-This folder houses the core app implementation, which follows the Model-View-ViewModel pattern. It is organized into several subdirectories:
+This folder contains the core app implementation, which is implemented in Swift/SwiftUI and follows the Model-View-ViewModel pattern. It is organized into several subdirectories:
 
 - **models/**  
   Contains data model definitions that structure:
